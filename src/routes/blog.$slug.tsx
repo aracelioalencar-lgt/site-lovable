@@ -89,13 +89,10 @@ function BlogPost() {
                   {post.conteudo}
                 </div>
                 {post.imagens && post.imagens.length > 0 && (
-                  <div className="mt-16">
-                    <h2 className="text-xs uppercase tracking-[0.3em] text-muted-foreground mb-6">Galeria de imagens</h2>
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {post.imagens.map((url, i) => (
-                        <img key={i} src={url} alt={`Imagem ${i + 1}`} className="w-full h-64 object-cover border border-border hover:border-clay transition-colors cursor-pointer" />
-                      ))}
-                    </div>
+                  <div className="mt-8 space-y-4">
+                    {post.imagens.map((url, i) => (
+                      <img key={i} src={url} alt={`Imagem ${i + 1}`} className="w-full max-h-[500px] object-contain border border-border" />
+                    ))}
                   </div>
                 )}
               </div>

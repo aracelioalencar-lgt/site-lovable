@@ -235,18 +235,42 @@ function Dashboard({ user }: { user: User }) {
 }
 
 function PostEditor({ post, user, onClose }: { post: Post | null; user: User; onClose: () => void }) {
-  const [titulo, setTitulo] = useState(post?.titulo ?? "");
-  const [slug, setSlug] = useState(post?.slug ?? "");
+  const [titulo, setTitulo] = useState("");
+  const [slug, setSlug] = useState("");
   const [excerpt, setExcerpt] = useState("");
   const [conteudo, setConteudo] = useState("");
-  const [categoria, setCategoria] = useState(post?.categoria ?? "noticia");
-  const [autor, setAutor] = useState(post?.autor ?? "");
+  const [categoria, setCategoria] = useState("noticia");
+  const [autor, setAutor] = useState("");
   const [capaUrl, setCapaUrl] = useState<string | null>(null);
   const [imagens, setImagens] = useState<string[]>([]);
-  const [publicado, setPublicado] = useState(post?.publicado ?? false);
+  const [publicado, setPublicado] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [err, setErr] = useState("");
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [autoSaveKey] = useState(() => `draft-${post?.id || 'new'}`);
+
+  useEffect(() => {
+    const saved = localStorage.getItem(autoSaveKey);
+    if (saved) {
+      const draft = JSON.parse(saved);
+      setTitulo(draft.titulo || post?.titulo || "");
+      setSlug(draft.slug || post?.slug || "");
+      setExcerpt(draft.excerpt || "");
+      setConteudo(draft.conteudo || "");
+      setCategoria(draft.categoria || post?.categoria || "noticia");
+      setAutor(draft.autor || post?.autor || "");
+      setCapaUrl(draft.capa_url ?? post?.capa_url ?? null);
+      setImagens(draft.imagens || post?.imagens || []);
+      setPublicado(draft.publicado ?? post?.publicado ?? false);
+    } else if (post) {
+      setTitulo(post.titulo);
+      setSlug(post.slug);
+      setCategoria(post.categoria);
+      setAutor(post.autor || "");
+      setPublicado(post.publicado);
+    }
+  }, [autoSaveKey, post]);
 
   useEffect(() => {
     if (!post) return;
@@ -256,13 +280,28 @@ function PostEditor({ post, user, onClose }: { post: Post | null; user: User; on
         setConteudo(data.conteudo ?? "");
         setCapaUrl(data.capa_url);
         setImagens(data.imagens ?? []);
+        localStorage.setItem(autoSaveKey, JSON.stringify({
+          titulo: post.titulo,
+          slug: post.slug,
+          excerpt: data.excerpt ?? "",
+          conteudo: data.conteudo ?? "",
+          categoria: post.categoria,
+          autor: post.autor ?? "",
+          capa_url: data.capa_url,
+          imagens: data.imagens ?? [],
+          publicado: post.publicado
+        }));
       }
     });
-  }, [post]);
+  }, [post, autoSaveKey]);
 
   useEffect(() => {
     if (!post) setSlug(slugify(titulo));
   }, [titulo, post]);
+
+  useEffect(() => {
+    localStorage.setItem(autoSaveKey, JSON.stringify({ titulo, slug, excerpt, conteudo, categoria, autor, capa_url: capaUrl, imagens, publicado }));
+  }, [titulo, slug, excerpt, conteudo, categoria, autor, capaUrl, imagens, publicado, autoSaveKey]);
 
   async function uploadCapa(file: File) {
     setUploading(true); setErr("");
@@ -301,10 +340,10 @@ function PostEditor({ post, user, onClose }: { post: Post | null; user: User; on
     e.preventDefault();
     setSaving(true); setErr("");
     const payload = {
-      titulo,
-      slug: slug || slugify(titulo),
+      titulo: titulo || post?.titulo || "",
+      slug: slug || slugify(titulo) || "",
       excerpt: excerpt || null,
-      conteudo,
+      conteudo: conteudo || "",
       categoria,
       autor: autor || null,
       capa_url: capaUrl,
@@ -318,7 +357,10 @@ function PostEditor({ post, user, onClose }: { post: Post | null; user: User; on
       : await supabase.from("posts").insert(payload);
     setSaving(false);
     if (error) setErr(error.message);
-    else onClose();
+    else {
+      localStorage.removeItem(autoSaveKey);
+      onClose();
+    }
   }
 
   return (
