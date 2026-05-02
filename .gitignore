@@ -20,6 +20,7 @@ dist-ssr
 .wrangler/
 dist/client/wrangler.json
 dist/client/.assetsignore
+dist/client/index.html
 .dev.vars
 
 # Editor directories and files
