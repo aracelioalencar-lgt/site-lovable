@@ -4,29 +4,8 @@ import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { supabase } from "@/integrations/supabase/client";
 
-function parseSlugFromUrl() {
-  const path = window.location.pathname;
-  const match = path.match(/^\/blog\/([^/]+)$/);
-  return match ? match[1] : null;
-}
-
 export const Route = createFileRoute("/blog")({
   component: BlogList,
-  beforeLoad: async () => {
-    const slug = parseSlugFromUrl();
-    if (slug) {
-      const { data } = await supabase
-        .from("posts")
-        .select("id, titulo, excerpt, conteudo, capa_url, imagens, categoria, autor, published_at")
-        .eq("slug", slug)
-        .eq("publicado", true)
-        .maybeSingle();
-      if (data) {
-        return { post: data };
-      }
-    }
-    return { post: null };
-  },
 });
 
 type Post = {
@@ -34,6 +13,7 @@ type Post = {
   titulo: string;
   slug: string;
   excerpt: string | null;
+  conteudo: string;
   capa_url: string | null;
   categoria: string;
   autor: string | null;
@@ -43,31 +23,41 @@ type Post = {
 
 const CATEGORIAS = ["todas", "noticia", "oficina", "evento"];
 
-import { useRouteLoaderData } from "@tanstack/react-router";
-
 function BlogList() {
-  const loaderData = useRouteLoaderData("/blog") as { post: any } | undefined;
   const [posts, setPosts] = useState<Post[]>([]);
   const [filtro, setFiltro] = useState("todas");
   const [loading, setLoading] = useState(true);
-
-  const currentPost = loaderData?.post;
+  const [currentPost, setCurrentPost] = useState<Post | null>(null);
 
   useEffect(() => {
-    if (currentPost) return;
-    setLoading(true);
-    let q = supabase
-      .from("posts")
-      .select("id, titulo, slug, excerpt, capa_url, categoria, autor, published_at, imagens")
-      .eq("publicado", true)
-      .order("published_at", { ascending: false });
-    if (filtro !== "todas") q = q.eq("categoria", filtro);
-    q.then(({ data, error }) => {
-      console.log("Posts loaded:", data, "error:", error);
-      setPosts(data ?? []);
-      setLoading(false);
-    });
-  }, [filtro, currentPost]);
+    const path = window.location.pathname;
+    const slugMatch = path.match(/^\/blog\/([^/]+)$/);
+    if (slugMatch) {
+      const slug = slugMatch[1];
+      supabase
+        .from("posts")
+        .select("id, titulo, excerpt, conteudo, capa_url, imagens, categoria, autor, published_at")
+        .eq("slug", slug)
+        .eq("publicado", true)
+        .maybeSingle()
+        .then(({ data }) => {
+          if (data) setCurrentPost(data);
+          setLoading(false);
+        });
+    } else {
+      setLoading(true);
+      let q = supabase
+        .from("posts")
+        .select("id, titulo, slug, excerpt, capa_url, categoria, autor, published_at, imagens")
+        .eq("publicado", true)
+        .order("published_at", { ascending: false });
+      if (filtro !== "todas") q = q.eq("categoria", filtro);
+      q.then(({ data }) => {
+        setPosts(data ?? []);
+        setLoading(false);
+      });
+    }
+  }, [filtro]);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
