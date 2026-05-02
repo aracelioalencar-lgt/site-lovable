@@ -22,6 +22,7 @@ type Post = {
   excerpt: string | null;
   conteudo: string;
   capa_url: string | null;
+  imagens: string[] | null;
   categoria: string;
   autor: string | null;
   published_at: string | null;
@@ -36,7 +37,7 @@ function BlogPost() {
   useEffect(() => {
     supabase
       .from("posts")
-      .select("id, titulo, excerpt, conteudo, capa_url, categoria, autor, published_at")
+      .select("id, titulo, excerpt, conteudo, capa_url, imagens, categoria, autor, published_at")
       .eq("slug", slug)
       .eq("publicado", true)
       .maybeSingle()
@@ -75,16 +76,28 @@ function BlogPost() {
                   </>
                 )}
               </div>
-              {post.capa_url && (
-                <img src={post.capa_url} alt={post.titulo} className="mt-12 w-full aspect-[16/10] object-cover" />
-              )}
-              {post.excerpt && (
-                <p className="mt-12 font-display text-2xl md:text-3xl italic text-clay leading-snug">
-                  {post.excerpt}
-                </p>
-              )}
-              <div className="mt-12 prose prose-lg max-w-none text-foreground/90 leading-relaxed whitespace-pre-wrap text-lg">
-                {post.conteudo}
+              <div className="mt-12 space-y-8">
+                {post.capa_url && (
+                  <img src={post.capa_url} alt={post.titulo} className="w-full max-h-[600px] object-cover" />
+                )}
+                {post.excerpt && (
+                  <p className="font-display text-2xl md:text-3xl italic text-clay leading-snug">
+                    {post.excerpt}
+                  </p>
+                )}
+                <div className="prose prose-lg max-w-none text-foreground/90 leading-relaxed whitespace-pre-wrap text-lg">
+                  {post.conteudo}
+                </div>
+                {post.imagens && post.imagens.length > 0 && (
+                  <div className="mt-16">
+                    <h2 className="text-xs uppercase tracking-[0.3em] text-muted-foreground mb-6">Galeria de imagens</h2>
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {post.imagens.map((url, i) => (
+                        <img key={i} src={url} alt={`Imagem ${i + 1}`} className="w-full h-64 object-cover border border-border hover:border-clay transition-colors cursor-pointer" />
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </>
           )}

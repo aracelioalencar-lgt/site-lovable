@@ -31,6 +31,7 @@ type Post = {
   categoria: string;
   autor: string | null;
   published_at: string | null;
+  imagens: string[] | null;
 };
 
 const CATEGORIAS = ["todas", "noticia", "oficina", "evento"];
@@ -44,7 +45,7 @@ function BlogList() {
     setLoading(true);
     let q = supabase
       .from("posts")
-      .select("id, titulo, slug, excerpt, capa_url, categoria, autor, published_at")
+      .select("id, titulo, slug, excerpt, capa_url, categoria, autor, published_at, imagens")
       .eq("publicado", true)
       .order("published_at", { ascending: false });
     if (filtro !== "todas") q = q.eq("categoria", filtro);
@@ -96,22 +97,29 @@ function BlogList() {
               <p className="text-muted-foreground">Nenhuma postagem ainda.</p>
             </div>
           )}
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-16">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
             {posts.map((p) => (
               <Link key={p.id} to="/blog/$slug" params={{ slug: p.slug }} className="group block">
                 <div className="relative overflow-hidden aspect-[4/5] mb-5 bg-secondary">
                   {p.capa_url ? (
                     <img src={p.capa_url} alt={p.titulo} loading="lazy" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                  ) : p.imagens && p.imagens.length > 0 ? (
+                    <img src={p.imagens[0]} alt={p.titulo} loading="lazy" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
                   ) : (
                     <div className="h-full w-full bg-clay/20 flex items-center justify-center text-6xl text-clay/40 font-display">✦</div>
                   )}
                   <div className="absolute top-4 left-4 bg-paper text-ink text-xs px-3 py-1.5 font-mono uppercase tracking-wider">{p.categoria}</div>
+                  {p.imagens && p.imagens.length > 0 && (
+                    <div className="absolute bottom-4 right-4 bg-paper/90 text-ink text-xs px-2 py-1 font-mono">
+                      {p.imagens.length} imgs
+                    </div>
+                  )}
                 </div>
                 <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground mb-2">
                   {p.published_at ? new Date(p.published_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" }) : ""}
                   {p.autor ? ` · ${p.autor}` : ""}
                 </div>
-                <h2 className="font-display text-3xl leading-tight group-hover:text-clay transition-colors">{p.titulo}</h2>
+                <h2 className="font-display text-2xl md:text-3xl leading-tight group-hover:text-clay transition-colors">{p.titulo}</h2>
                 {p.excerpt && <p className="mt-3 text-muted-foreground leading-relaxed line-clamp-3">{p.excerpt}</p>}
               </Link>
             ))}

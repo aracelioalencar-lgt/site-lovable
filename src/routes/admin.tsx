@@ -26,6 +26,8 @@ type Post = {
   publicado: boolean;
   published_at: string | null;
   autor: string | null;
+  capa_url: string | null;
+  imagens: string[] | null;
 };
 
 function AdminPage() {
@@ -240,6 +242,7 @@ function PostEditor({ post, user, onClose }: { post: Post | null; user: User; on
   const [categoria, setCategoria] = useState(post?.categoria ?? "noticia");
   const [autor, setAutor] = useState(post?.autor ?? "");
   const [capaUrl, setCapaUrl] = useState<string | null>(null);
+  const [imagens, setImagens] = useState<string[]>([]);
   const [publicado, setPublicado] = useState(post?.publicado ?? false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -247,11 +250,12 @@ function PostEditor({ post, user, onClose }: { post: Post | null; user: User; on
 
   useEffect(() => {
     if (!post) return;
-    supabase.from("posts").select("excerpt, conteudo, capa_url").eq("id", post.id).single().then(({ data }) => {
+    supabase.from("posts").select("excerpt, conteudo, capa_url, imagens").eq("id", post.id).single().then(({ data }) => {
       if (data) {
         setExcerpt(data.excerpt ?? "");
         setConteudo(data.conteudo ?? "");
         setCapaUrl(data.capa_url);
+        setImagens(data.imagens ?? []);
       }
     });
   }, [post]);
@@ -271,6 +275,28 @@ function PostEditor({ post, user, onClose }: { post: Post | null; user: User; on
     setUploading(false);
   }
 
+  async function uploadImagem(file: File): Promise<string | null> {
+    setUploading(true); setErr("");
+    const ext = file.name.split(".").pop();
+    const path = `${user.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+    const { error } = await supabase.storage.from("post-images").upload(path, file, { upsert: false });
+    if (error) { setErr(error.message); setUploading(false); return null; }
+    const { data } = supabase.storage.from("post-images").getPublicUrl(path);
+    setUploading(false);
+    return data.publicUrl;
+  }
+
+  async function handleAddImagem(file: File) {
+    const url = await uploadImagem(file);
+    if (url) {
+      setImagens([...imagens, url]);
+    }
+  }
+
+  function removerImagem(index: number) {
+    setImagens(imagens.filter((_, i) => i !== index));
+  }
+
   async function save(e: FormEvent) {
     e.preventDefault();
     setSaving(true); setErr("");
@@ -282,6 +308,7 @@ function PostEditor({ post, user, onClose }: { post: Post | null; user: User; on
       categoria,
       autor: autor || null,
       capa_url: capaUrl,
+      imagens: imagens.length > 0 ? imagens : null,
       publicado,
       published_at: publicado ? (post?.published_at ?? new Date().toISOString()) : null,
       author_id: user.id,
@@ -345,6 +372,25 @@ function PostEditor({ post, user, onClose }: { post: Post | null; user: User; on
               Remover imagem
             </button>
           )}
+        </div>
+
+        <div>
+          <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground block mb-2">Galeria de imagens</label>
+          <div className="grid grid-cols-4 gap-3 mb-3">
+            {imagens.map((url, i) => (
+              <div key={i} className="relative group">
+                <img src={url} alt={`Imagem ${i + 1}`} className="w-full h-24 object-cover border border-border" />
+                <button type="button" onClick={() => removerImagem(i)} className="absolute top-1 right-1 bg-destructive text-white text-xs px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+          <label className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] cursor-pointer text-clay hover:text-ochre transition-colors">
+            <input type="file" accept="image/*" onChange={(e) => e.target.files?.[0] && handleAddImagem(e.target.files[0])} className="hidden" />
+            + Adicionar imagem
+          </label>
+          {uploading && <div className="text-xs text-muted-foreground mt-2">Enviando…</div>}
         </div>
 
         <div>
