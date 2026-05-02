@@ -24,7 +24,7 @@ export function Footer() {
             <div className="text-xs uppercase tracking-[0.3em] text-paper/60 mb-4">Contato</div>
             <p className="leading-relaxed">
               contato@eikenproject.com.br<br />
-              +55 87 9 9999-9999
+              +55 87 9 9184-8267
             </p>
           </div>
         </div>
