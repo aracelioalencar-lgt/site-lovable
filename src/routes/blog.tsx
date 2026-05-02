@@ -49,7 +49,8 @@ function BlogList() {
       .eq("publicado", true)
       .order("published_at", { ascending: false });
     if (filtro !== "todas") q = q.eq("categoria", filtro);
-    q.then(({ data }) => {
+    q.then(({ data, error }) => {
+      console.log("Posts loaded:", data, "error:", error);
       setPosts(data ?? []);
       setLoading(false);
     });
