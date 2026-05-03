@@ -65,7 +65,7 @@ function ProjetosPage() {
       <section className="pt-32 md:pt-40 pb-20 px-6 lg:px-12 border-b border-border relative overflow-hidden">
         <div className="absolute inset-0">
           <img
-            src="https://images.unsplash.com/photo-1478737270239-2f02b77ac6d5?w=1920&q=80"
+            src="https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=1920&q=80"
             alt="Podcast"
             className="h-full w-full object-cover opacity-30"
           />
