@@ -173,6 +173,7 @@ function NotAdmin({ email, userId, onPromoted }: { email: string; userId: string
 function Dashboard({ user }: { user: User }) {
   const [posts, setPosts] = useState<Post[]>([]);
   const [editing, setEditing] = useState<Post | "new" | null>(null);
+  const [showPodcastEditor, setShowPodcastEditor] = useState(false);
 
   async function load() {
     const { data } = await supabase.from("posts").select("id, titulo, slug, categoria, publicado, published_at, autor").order("created_at", { ascending: false });
@@ -181,6 +182,8 @@ function Dashboard({ user }: { user: User }) {
   useEffect(() => { load(); }, []);
 
   if (editing) return <PostEditor post={editing === "new" ? null : editing} user={user} onClose={() => { setEditing(null); load(); }} />;
+  
+  if (showPodcastEditor) return <PodcastEditor user={user} onClose={() => { setShowPodcastEditor(false); load(); }} />;
 
   return (
     <>
@@ -192,7 +195,7 @@ function Dashboard({ user }: { user: User }) {
           <h1 className="font-display text-5xl md:text-6xl tracking-tight">Postagens</h1>
         </div>
         <div className="flex items-center gap-4">
-          <button onClick={() => window.location.href = '/admin/podcast'} className="bg-clay text-paper px-5 py-3 text-xs uppercase tracking-[0.2em] hover:bg-ochre hover:text-ink transition-colors rounded">
+          <button onClick={() => setShowPodcastEditor(true)} className="bg-clay text-paper px-5 py-3 text-xs uppercase tracking-[0.2em] hover:bg-ochre hover:text-ink transition-colors rounded">
             + Novo Podcast
           </button>
           <button onClick={() => setEditing("new")} className="bg-secondary text-foreground px-5 py-3 text-xs uppercase tracking-[0.2em] hover:bg-clay/20 transition-colors">
@@ -507,5 +510,242 @@ function PostEditor({ post, user, onClose }: { post: Post | null; user: User; on
         {err && <div className="text-destructive text-sm">{err}</div>}
       </div>
     </form>
+  );
+}
+
+function PodcastEditor({ user, onClose }: { user: User; onClose: () => void }) {
+  const [titulo, setTitulo] = useState("");
+  const [slug, setSlug] = useState("");
+  const [excerpt, setExcerpt] = useState("");
+  const [conteudo, setConteudo] = useState("");
+  const [autor, setAutor] = useState("");
+  const [capaUrl, setCapaUrl] = useState<string | null>(null);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [imagens, setImagens] = useState<string[]>([]);
+  const [publicado, setPublicado] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [err, setErr] = useState("");
+
+  useEffect(() => {
+    setSlug(slugify(titulo));
+  }, [titulo]);
+
+  async function uploadCapa(file: File) {
+    setUploading(true); setErr("");
+    try {
+      const ext = file.name.split(".").pop();
+      const path = `${user.id}/podcast/${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from("post-images").upload(path, file, { upsert: false });
+      if (error) throw error;
+      const { data } = supabase.storage.from("post-images").getPublicUrl(path);
+      setCapaUrl(data.publicUrl);
+    } catch (e: any) {
+      setErr(e.message);
+    }
+    setUploading(false);
+  }
+
+  async function uploadAudio(file: File) {
+    setUploading(true); setErr("");
+    try {
+      const ext = file.name.split(".").pop();
+      const path = `${user.id}/podcast/audio/${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from("post-images").upload(path, file, { upsert: false });
+      if (error) throw error;
+      const { data } = supabase.storage.from("post-images").getPublicUrl(path);
+      setAudioUrl(data.publicUrl);
+    } catch (e: any) {
+      setErr(e.message);
+    }
+    setUploading(false);
+  }
+
+  async function save(e: FormEvent) {
+    e.preventDefault();
+    setSaving(true); setErr("");
+    
+    if (!audioUrl) {
+      setErr("Por favor, adicione um arquivo de áudio para o podcast.");
+      setSaving(false);
+      return;
+    }
+
+    const payload = {
+      titulo,
+      slug: slug || slugify(titulo),
+      excerpt: excerpt || null,
+      conteudo: conteudo || "",
+      categoria: "podcast",
+      autor: autor || null,
+      capa_url: capaUrl,
+      imagens: imagens.length > 0 ? imagens : null,
+      audio_url: audioUrl,
+      publicado,
+      published_at: publicado ? new Date().toISOString() : null,
+      author_id: user.id,
+    };
+
+    const { error } = await supabase.from("posts").insert(payload);
+    setSaving(false);
+    
+    if (error) {
+      setErr(error.message);
+    } else {
+      onClose();
+    }
+  }
+
+  return (
+    <div className="max-w-3xl mx-auto">
+      <div className="flex items-center justify-between mb-8">
+        <button onClick={onClose} className="text-sm text-muted-foreground hover:text-clay">
+          ← Voltar
+        </button>
+        <div className="text-xs uppercase tracking-[0.2em] text-clay">
+          🎙️ Novo Podcast
+        </div>
+      </div>
+
+      <form onSubmit={save} className="space-y-6">
+        <div>
+          <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground block mb-2">Título do Episódio</label>
+          <input
+            value={titulo}
+            onChange={(e) => setTitulo(e.target.value)}
+            required
+            placeholder="Ex: Episode 1 - Histórias do Sertão"
+            className="w-full bg-transparent border-b border-border focus:border-clay outline-none py-2 font-display text-2xl"
+          />
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-4">
+          <div>
+            <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground block mb-2">Autor/Apresentador</label>
+            <input
+              value={autor}
+              onChange={(e) => setAutor(e.target.value)}
+              placeholder="Ex: João da Silva"
+              className="w-full bg-transparent border-b border-border focus:border-clay outline-none py-2"
+            />
+          </div>
+          <div>
+            <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground block mb-2">Slug</label>
+            <input
+              value={slug}
+              onChange={(e) => setSlug(slugify(e.target.value))}
+              className="w-full bg-transparent border-b border-border focus:border-clay outline-none py-2 font-mono text-sm"
+            />
+          </div>
+        </div>
+
+        <div className="bg-clay/10 border border-clay/30 rounded-lg p-4">
+          <div className="text-xs uppercase tracking-[0.2em] text-clay mb-3 font-semibold">
+            🎙️ Arquivo de Áudio *
+          </div>
+          
+          {!audioUrl ? (
+            <div className="border-2 border-dashed border-clay/30 rounded-lg p-6 text-center">
+              <input
+                type="file"
+                accept="audio/*"
+                onChange={(e) => e.target.files?.[0] && uploadAudio(e.target.files[0])}
+                className="hidden"
+                id="audio-upload-inline"
+                disabled={uploading}
+              />
+              <label htmlFor="audio-upload-inline" className="cursor-pointer">
+                <div className="text-2xl mb-1">🎧</div>
+                <div className="text-xs text-muted-foreground">
+                  {uploading ? "Enviando..." : "Selecionar arquivo de áudio"}
+                </div>
+              </label>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between bg-background rounded p-3 border border-border">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-clay/20 flex items-center justify-center">
+                  <svg className="w-4 h-4 text-clay" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z" />
+                  </svg>
+                </div>
+                <span className="text-sm truncate max-w-[150px]">{audioUrl.split("/").pop()}</span>
+              </div>
+              <button type="button" onClick={() => setAudioUrl(null)} className="text-xs text-destructive hover:underline">
+                Remover
+              </button>
+            </div>
+          )}
+        </div>
+
+        <div>
+          <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground block mb-2">Imagem de Capa</label>
+          {capaUrl ? (
+            <div className="relative inline-block mb-2">
+              <img src={capaUrl} alt="capa" className="max-h-32 w-auto rounded border border-border" />
+              <button type="button" onClick={() => setCapaUrl(null)} className="absolute top-1 right-1 bg-destructive text-white text-xs px-2 py-1 rounded">
+                ×
+              </button>
+            </div>
+          ) : (
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => e.target.files?.[0] && uploadCapa(e.target.files[0])}
+              className="text-sm"
+              disabled={uploading}
+            />
+          )}
+        </div>
+
+        <div>
+          <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground block mb-2">Descrição Curta</label>
+          <textarea
+            value={excerpt}
+            onChange={(e) => setExcerpt(e.target.value)}
+            rows={2}
+            placeholder="Uma breve descrição..."
+            className="w-full bg-transparent border border-border focus:border-clay outline-none p-3 italic text-sm"
+          />
+        </div>
+
+        <div>
+          <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground block mb-2">Descrição Completa</label>
+          <textarea
+            value={conteudo}
+            onChange={(e) => setConteudo(e.target.value)}
+            rows={6}
+            placeholder="Descrição detalhada..."
+            className="w-full bg-transparent border border-border focus:border-clay outline-none p-4 text-sm"
+          />
+        </div>
+
+        {err && <div className="text-destructive text-sm bg-destructive/10 p-3 rounded">{err}</div>}
+
+        <div className="flex items-center justify-between pt-4 border-t border-border">
+          <button type="button" onClick={onClose} className="text-sm text-muted-foreground hover:text-clay">
+            Cancelar
+          </button>
+          <div className="flex items-center gap-4">
+            <label className="flex items-center gap-2 text-xs uppercase tracking-[0.2em]">
+              <input
+                type="checkbox"
+                checked={publicado}
+                onChange={(e) => setPublicado(e.target.checked)}
+                className="accent-clay h-4 w-4"
+              />
+              Publicar
+            </label>
+            <button
+              disabled={saving || uploading}
+              type="submit"
+              className="bg-clay text-paper px-6 py-3 text-xs uppercase tracking-[0.2em] hover:bg-ochre transition-colors disabled:opacity-50 rounded"
+            >
+              {saving ? "Salvando..." : "Salvar Podcast"}
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
   );
 }
