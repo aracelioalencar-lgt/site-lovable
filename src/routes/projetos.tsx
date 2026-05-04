@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { supabase } from "@/integrations/supabase/client";
@@ -26,6 +26,7 @@ function ProjetosPage() {
   const [podcasts, setPodcasts] = useState<Podcast[]>([]);
   const [loading, setLoading] = useState(true);
   const [playing, setPlaying] = useState<string | null>(null);
+  const [progress, setProgress] = useState<Record<string, number>>({});
 
   useEffect(() => {
     supabase
@@ -39,23 +40,45 @@ function ProjetosPage() {
       });
   }, []);
 
-  const handlePlay = (id: string, audioUrl: string) => {
+  const handlePlay = (e: React.MouseEvent, id: string, audioUrl: string) => {
+    e.stopPropagation();
+    e.preventDefault();
+    
+    const audio = document.getElementById(`audio-${id}`) as HTMLAudioElement;
+    if (!audio) return;
+    
+    if (playing === id) {
+      audio.pause();
+      setPlaying(null);
+    } else {
+      document.querySelectorAll('audio').forEach((a) => (a as HTMLAudioElement).pause());
+      audio.play();
+      setPlaying(id);
+    }
+  };
+
+  const handleTimeUpdate = (id: string) => {
     const audio = document.getElementById(`audio-${id}`) as HTMLAudioElement;
     if (audio) {
-      if (playing === id) {
-        audio.pause();
-        setPlaying(null);
-      } else {
-        document.querySelectorAll('audio').forEach((a) => (a as HTMLAudioElement).pause());
-        audio.play();
-        setPlaying(id);
-      }
+      const percent = (audio.currentTime / audio.duration) * 100;
+      setProgress(prev => ({ ...prev, [id]: percent }));
     }
+  };
+
+  const handleEnded = () => {
+    setPlaying(null);
+    setProgress({});
   };
 
   const extractAudioUrl = (conteudo: string): string | null => {
     const match = conteudo.match(/https:\/\/[^\s]+\.(mp3|wav|ogg|m4a)/i);
     return match ? match[0] : null;
+  };
+
+  const formatDuration = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   return (
@@ -75,7 +98,7 @@ function ProjetosPage() {
             <span className="text-clay">§</span> Frequência Sertaneja
           </div>
           <h1 className="font-display text-6xl md:text-8xl lg:text-9xl tracking-tight leading-[0.9]">
-            Podcasts<span className="text-clay">.</span>
+            Projetos<span className="text-clay">.</span>
           </h1>
           <p className="mt-8 max-w-2xl text-lg text-muted-foreground leading-relaxed">
             Vozes do sertão, histórias contadas e sons que ecoam na caatinga.
@@ -104,86 +127,128 @@ function ProjetosPage() {
             </div>
           )}
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {podcasts.map((p) => {
               const audioUrl = p.audio_url || extractAudioUrl(p.conteudo);
+              const isPlaying = playing === p.id;
               return (
                 <div
                   key={p.id}
-                  className="group relative overflow-hidden rounded-2xl bg-card border border-border hover:border-clay/50 transition-all duration-500 hover:shadow-2xl hover:shadow-clay/10"
+                  className="group relative bg-card rounded-2xl overflow-hidden border border-border hover:border-clay/40 transition-all duration-300 hover:shadow-xl hover:shadow-clay/5 cursor-pointer"
                   onClick={() => (window.location.href = `/podcasts/${p.slug}`)}
                 >
-                  <div className="relative aspect-square mb-5 bg-secondary rounded-xl overflow-hidden">
+                  <audio
+                    id={`audio-${p.id}`}
+                    src={audioUrl || undefined}
+                    onTimeUpdate={() => handleTimeUpdate(p.id)}
+                    onEnded={handleEnded}
+                  />
+                  
+                  <div className="relative aspect-[4/3] overflow-hidden">
                     {p.capa_url ? (
                       <img
                         src={p.capa_url}
                         alt={p.titulo}
                         loading="lazy"
-                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                       />
                     ) : (
-                      <div className="h-full w-full bg-gradient-to-br from-clay/20 to-ochre/20 flex items-center justify-center text-6xl text-clay/40">
-                        🎙️
+                      <div className="h-full w-full bg-gradient-to-br from-clay/30 via-ochre/20 to-clay/10 flex items-center justify-center">
+                        <div className="text-8xl">🎙️</div>
                       </div>
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                    
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                    
                     {audioUrl && (
-                      <div className="absolute bottom-4 right-4">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handlePlay(p.id, audioUrl);
-                          }}
-                          className="w-12 h-12 rounded-full bg-clay/90 hover:bg-clay flex items-center justify-center transition-all transform hover:scale-110 shadow-lg"
-                        >
-                          {playing === p.id ? (
-                            <svg className="w-5 h-5 text-paper" fill="currentColor" viewBox="0 0 24 24">
-                              <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
-                            </svg>
-                          ) : (
-                            <svg className="w-5 h-5 text-paper ml-0.5" fill="currentColor" viewBox="0 0 24 24">
-                              <path d="M8 5v14l11-7z" />
-                            </svg>
-                          )}
-                        </button>
+                      <div className="absolute bottom-4 left-4 right-4">
+                        <div className="bg-black/60 backdrop-blur-sm rounded-full p-1 pr-3 flex items-center gap-3">
+                          <button
+                            onClick={(e) => handlePlay(e, p.id, audioUrl)}
+                            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+                              isPlaying 
+                                ? 'bg-ochre text-ink' 
+                                : 'bg-clay text-paper hover:bg-ochre hover:text-ink'
+                            }`}
+                          >
+                            {isPlaying ? (
+                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+                              </svg>
+                            ) : (
+                              <svg className="w-4 h-4 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M8 5v14l11-7z" />
+                              </svg>
+                            )}
+                          </button>
+                          <div className="flex-1 min-w-0">
+                            <div className="h-1.5 bg-white/20 rounded-full overflow-hidden">
+                              <div 
+                                className="h-full bg-clay rounded-full transition-all duration-300"
+                                style={{ width: `${progress[p.id] || 0}%` }}
+                              />
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     )}
-                    <div className="absolute top-4 left-4 bg-clay text-paper text-xs px-3 py-1.5 font-mono uppercase tracking-wider rounded-full">
-                      🎧 Podcast
+                    
+                    <div className="absolute top-4 left-4">
+                      <span className="bg-clay/90 text-paper text-xs font-mono px-3 py-1.5 uppercase tracking-wider rounded-full backdrop-blur-sm">
+                        🎧 Podcast
+                      </span>
                     </div>
                   </div>
-                  <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground mb-2">
-                    {p.published_at
-                      ? new Date(p.published_at).toLocaleDateString("pt-BR", {
-                          day: "2-digit",
-                          month: "long",
-                          year: "numeric",
-                        })
-                      : ""}
-                    {p.autor ? ` · ${p.autor}` : ""}
-                  </div>
-                  <h2 className="font-display text-2xl md:text-3xl leading-tight group-hover:text-clay transition-colors line-clamp-2">
-                    {p.titulo}
-                  </h2>
-                  {p.excerpt && (
-                    <p className="mt-3 text-muted-foreground leading-relaxed line-clamp-2">{p.excerpt}</p>
-                  )}
-                  {audioUrl && (
-                    <div className="mt-4 flex items-center gap-2 text-xs text-clay">
-                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z" />
-                      </svg>
-                      <span> Disponível para reprodução</span>
+                  
+                  <div className="p-5">
+                    <div className="flex items-center gap-3 text-xs text-muted-foreground mb-3">
+                      <span className="font-mono text-clay/80">
+                        {p.published_at
+                          ? new Date(p.published_at).toLocaleDateString("pt-BR", {
+                              day: "2-digit",
+                              month: "short",
+                              year: "numeric",
+                            })
+                          : ""}
+                      </span>
+                      {p.autor && (
+                        <>
+                          <span className="w-1 h-1 rounded-full bg-muted-foreground/40" />
+                          <span>{p.autor}</span>
+                        </>
+                      )}
                     </div>
-                  )}
+                    
+                    <h2 className="font-display text-xl md:text-2xl leading-tight mb-3 group-hover:text-clay transition-colors line-clamp-2">
+                      {p.titulo}
+                    </h2>
+                    
+                    {p.excerpt && (
+                      <p className="text-muted-foreground text-sm leading-relaxed line-clamp-2">
+                        {p.excerpt}
+                      </p>
+                    )}
+                    
+                    <div className="mt-4 pt-4 border-t border-border/50 flex items-center justify-between">
+                      <span className="text-xs text-muted-foreground uppercase tracking-wider group-hover:text-clay transition-colors">
+                        Ouvir episódio →
+                      </span>
+                      {audioUrl && (
+                        <span className="text-xs text-clay/70 flex items-center gap-1">
+                          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z" />
+                          </svg>
+                          Áudio
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 </div>
               );
             })}
           </div>
         </div>
       </section>
-
-      <audio onEnded={() => setPlaying(null)} />
 
       <Footer />
     </div>
