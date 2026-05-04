@@ -200,12 +200,12 @@ function ProjetosPage() {
                     
                     <div className="mt-4 pt-4 border-t border-border/50 flex items-center justify-between">
                       {audioUrl && (
-                        <span className="text-xs text-clay/70 flex items-center gap-1">
+                        <a href="https://orizonn.com.br/blog/o-uso-da-ia-na-producao-cultural" target="_blank" rel="noopener noreferrer" className="text-xs text-clay/70 flex items-center gap-1 hover:text-clay transition-colors">
                           <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z" />
                           </svg>
                           Áudio
-                        </span>
+                        </a>
                       )}
                     </div>
                   </div>
