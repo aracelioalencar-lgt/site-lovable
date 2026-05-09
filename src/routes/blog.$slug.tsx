@@ -2,6 +2,7 @@ import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
+import { ShareButton } from "@/components/ui/share-button";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/blog/$slug")({
@@ -56,7 +57,10 @@ function BlogPost() {
       <Nav />
       <article className="pt-32 md:pt-40 pb-20 px-6 lg:px-12">
         <div className="mx-auto max-w-3xl">
-          <Link to="/blog" className="text-xs uppercase tracking-[0.2em] text-muted-foreground hover:text-clay transition-colors">
+          <Link
+            to="/blog"
+            className="text-xs uppercase tracking-[0.2em] text-muted-foreground hover:text-clay transition-colors"
+          >
             ← Voltar ao blog
           </Link>
 
@@ -68,20 +72,36 @@ function BlogPost() {
           )}
           {post && (
             <>
-              <div className="mt-10 text-xs uppercase tracking-[0.3em] text-clay font-mono">{post.categoria}</div>
-              <h1 className="mt-6 font-display text-5xl md:text-7xl leading-[0.95] tracking-tight">{post.titulo}</h1>
+              <div className="mt-10 text-xs uppercase tracking-[0.3em] text-clay font-mono">
+                {post.categoria}
+              </div>
+              <h1 className="mt-6 font-display text-5xl md:text-7xl leading-[0.95] tracking-tight">
+                {post.titulo}
+              </h1>
               <div className="mt-8 flex flex-wrap items-center gap-4 text-xs uppercase tracking-[0.2em] text-muted-foreground border-y border-border py-4">
                 {post.autor && <span>Por {post.autor}</span>}
                 {post.published_at && (
                   <>
                     <span className="h-3 w-px bg-border" />
-                    <span>{new Date(post.published_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })}</span>
+                    <span>
+                      {new Date(post.published_at).toLocaleDateString("pt-BR", {
+                        day: "2-digit",
+                        month: "long",
+                        year: "numeric",
+                      })}
+                    </span>
                   </>
                 )}
+                <span className="h-3 w-px bg-border" />
+                <ShareButton title={post.titulo} />
               </div>
               <div className="mt-12 space-y-8">
                 {post.capa_url && (
-                  <img src={post.capa_url} alt={post.titulo} className="w-full max-h-[600px] object-cover" />
+                  <img
+                    src={post.capa_url}
+                    alt={post.titulo}
+                    className="w-full max-h-[600px] object-cover"
+                  />
                 )}
                 {post.excerpt && (
                   <p className="font-display text-2xl md:text-3xl italic text-clay leading-snug">
@@ -94,7 +114,12 @@ function BlogPost() {
                 {post.imagens && post.imagens && post.imagens.length > 0 && (
                   <div className="mt-8 space-y-4">
                     {post.imagens.map((url: string, i: number) => (
-                      <img key={i} src={url} alt={`Imagem ${i + 1}`} className="w-full max-h-[500px] object-contain border border-border" />
+                      <img
+                        key={i}
+                        src={url}
+                        alt={`Imagem ${i + 1}`}
+                        className="w-full max-h-[500px] object-contain border border-border"
+                      />
                     ))}
                   </div>
                 )}
