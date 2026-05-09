@@ -35,7 +35,9 @@ function PodcastsPage() {
       const slug = slugMatch[1];
       supabase
         .from("podcasts")
-        .select("id, titulo, excerpt, conteudo, capa_url, imagens, categoria, autor, published_at, audio_url")
+        .select(
+          "id, titulo, excerpt, conteudo, capa_url, imagens, categoria, autor, published_at, audio_url",
+        )
         .eq("slug", slug)
         .eq("publicado", true)
         .maybeSingle()
@@ -46,7 +48,9 @@ function PodcastsPage() {
     } else {
       supabase
         .from("podcasts")
-        .select("id, titulo, slug, excerpt, capa_url, categoria, autor, published_at, imagens, audio_url")
+        .select(
+          "id, titulo, slug, excerpt, capa_url, categoria, autor, published_at, imagens, audio_url",
+        )
         .eq("publicado", true)
         .order("published_at", { ascending: false })
         .then(({ data }) => {
@@ -63,7 +67,7 @@ function PodcastsPage() {
         audio.pause();
         setPlaying(null);
       } else {
-        document.querySelectorAll('audio').forEach((a) => (a as HTMLAudioElement).pause());
+        document.querySelectorAll("audio").forEach((a) => (a as HTMLAudioElement).pause());
         audio.play();
         setPlaying(id);
       }
@@ -151,14 +155,22 @@ function PodcastsPage() {
                         <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
                       </svg>
                     ) : (
-                      <svg className="w-5 h-5 text-paper ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                      <svg
+                        className="w-5 h-5 text-paper ml-0.5"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
                         <path d="M8 5v14l11-7z" />
                       </svg>
                     )}
                   </button>
                   <div className="flex-1 min-w-0">
-                    <div className="text-paper text-sm font-medium truncate">{currentPodcast.titulo}</div>
-                    <div className="text-paper/60 text-xs truncate">{currentPodcast.autor || "Lovab"}</div>
+                    <div className="text-paper text-sm font-medium truncate">
+                      {currentPodcast.titulo}
+                    </div>
+                    <div className="text-paper/60 text-xs truncate">
+                      {currentPodcast.autor || "Lovab"}
+                    </div>
                   </div>
                   <div className="text-paper/60 text-xs">
                     {playing === currentPodcast.id ? "Reproduzindo..." : "Pausado"}
@@ -196,7 +208,9 @@ function PodcastsPage() {
               </div>
 
               <div className="prose prose-lg max-w-none text-foreground/90 leading-relaxed whitespace-pre-wrap text-lg">
-                {currentPodcast.conteudo.replace(/https:\/\/[^\s]+\.(mp3|wav|ogg|m4a)/gi, "").trim()}
+                {currentPodcast.conteudo
+                  .replace(/https:\/\/[^\s]+\.(mp3|wav|ogg|m4a)/gi, "")
+                  .trim()}
               </div>
 
               {currentPodcast.imagens && currentPodcast.imagens.length > 0 && (
@@ -235,15 +249,16 @@ function PodcastsPage() {
             Podcasts<span className="text-clay">.</span>
           </h1>
           <p className="mt-8 max-w-2xl text-lg text-muted-foreground leading-relaxed">
-            Vozes do sertão, histórias contadas e sons que ecoam na caatinga.
-            Um projeto de comunicação comunitária.
+            Vozes do sertão, histórias contadas e sons que ecoam na caatinga. Um projeto de
+            comunicação comunitária.
           </p>
 
           <div className="mt-12 flex items-center gap-3">
             <div className="flex items-center gap-2 text-clay">
               <div className="w-3 h-3 rounded-full bg-clay animate-pulse" />
               <span className="text-xs uppercase tracking-[0.2em]">
-                {podcasts.length} episódio{podcasts.length !== 1 ? "s" : ""} disponível{podcasts.length !== 1 ? "s" : ""}
+                {podcasts.length} episódio{podcasts.length !== 1 ? "s" : ""} disponível
+                {podcasts.length !== 1 ? "s" : ""}
               </span>
             </div>
           </div>
@@ -293,11 +308,19 @@ function PodcastsPage() {
                           className="w-12 h-12 rounded-full bg-clay/90 hover:bg-clay flex items-center justify-center transition-all transform hover:scale-110 shadow-lg"
                         >
                           {playing === p.id ? (
-                            <svg className="w-5 h-5 text-paper" fill="currentColor" viewBox="0 0 24 24">
+                            <svg
+                              className="w-5 h-5 text-paper"
+                              fill="currentColor"
+                              viewBox="0 0 24 24"
+                            >
                               <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
                             </svg>
                           ) : (
-                            <svg className="w-5 h-5 text-paper ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                            <svg
+                              className="w-5 h-5 text-paper ml-0.5"
+                              fill="currentColor"
+                              viewBox="0 0 24 24"
+                            >
                               <path d="M8 5v14l11-7z" />
                             </svg>
                           )}
@@ -322,7 +345,9 @@ function PodcastsPage() {
                     {p.titulo}
                   </h2>
                   {p.excerpt && (
-                    <p className="mt-3 text-muted-foreground leading-relaxed line-clamp-2">{p.excerpt}</p>
+                    <p className="mt-3 text-muted-foreground leading-relaxed line-clamp-2">
+                      {p.excerpt}
+                    </p>
                   )}
                   {audioUrl && (
                     <div className="mt-4 flex items-center gap-2 text-xs text-clay">

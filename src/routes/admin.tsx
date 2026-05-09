@@ -39,7 +39,10 @@ function AdminPage() {
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
       setUser(session?.user ?? null);
       if (session?.user) checkAdmin(session.user.id);
-      else { setIsAdmin(false); setChecking(false); }
+      else {
+        setIsAdmin(false);
+        setChecking(false);
+      }
     });
     supabase.auth.getSession().then(({ data }) => {
       setUser(data.session?.user ?? null);
@@ -51,7 +54,12 @@ function AdminPage() {
 
   async function checkAdmin(uid: string) {
     setChecking(true);
-    const { data } = await supabase.from("user_roles").select("role").eq("user_id", uid).eq("role", "admin").maybeSingle();
+    const { data } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", uid)
+      .eq("role", "admin")
+      .maybeSingle();
     setIsAdmin(!!data);
     setChecking(false);
   }
@@ -63,7 +71,13 @@ function AdminPage() {
         <div className="mx-auto max-w-5xl">
           {checking && <div className="text-muted-foreground">Verificando acesso…</div>}
           {!checking && !user && <AuthForm />}
-          {!checking && user && !isAdmin && <NotAdmin email={user.email ?? ""} userId={user.id} onPromoted={() => checkAdmin(user.id)} />}
+          {!checking && user && !isAdmin && (
+            <NotAdmin
+              email={user.email ?? ""}
+              userId={user.id}
+              onPromoted={() => checkAdmin(user.id)}
+            />
+          )}
           {!checking && user && isAdmin && <Dashboard user={user} />}
         </div>
       </div>
@@ -81,13 +95,15 @@ function AuthForm() {
 
   async function submit(e: FormEvent) {
     e.preventDefault();
-    setErr(""); setLoading(true);
+    setErr("");
+    setLoading(true);
     if (mode === "login") {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) setErr(error.message);
     } else {
       const { error } = await supabase.auth.signUp({
-        email, password,
+        email,
+        password,
         options: {
           emailRedirectTo: window.location.origin + "/admin",
           data: { display_name: name },
@@ -105,43 +121,88 @@ function AuthForm() {
       </div>
       <h1 className="font-display text-5xl mb-2">{mode === "login" ? "Entrar" : "Criar conta"}</h1>
       <p className="text-muted-foreground mb-10">
-        {mode === "login" ? "Acesse o painel para gerenciar postagens." : "Cadastre-se para administrar o site."}
+        {mode === "login"
+          ? "Acesse o painel para gerenciar postagens."
+          : "Cadastre-se para administrar o site."}
       </p>
       <form onSubmit={submit} className="space-y-5">
         {mode === "signup" && (
           <div>
-            <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground block mb-2">Nome</label>
-            <input value={name} onChange={(e) => setName(e.target.value)} required className="w-full bg-transparent border-b border-border focus:border-clay outline-none py-2 text-lg" />
+            <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground block mb-2">
+              Nome
+            </label>
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              className="w-full bg-transparent border-b border-border focus:border-clay outline-none py-2 text-lg"
+            />
           </div>
         )}
         <div>
-          <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground block mb-2">Email</label>
-          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full bg-transparent border-b border-border focus:border-clay outline-none py-2 text-lg" />
+          <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground block mb-2">
+            Email
+          </label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="w-full bg-transparent border-b border-border focus:border-clay outline-none py-2 text-lg"
+          />
         </div>
         <div>
-          <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground block mb-2">Senha</label>
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} className="w-full bg-transparent border-b border-border focus:border-clay outline-none py-2 text-lg" />
+          <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground block mb-2">
+            Senha
+          </label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            minLength={6}
+            className="w-full bg-transparent border-b border-border focus:border-clay outline-none py-2 text-lg"
+          />
         </div>
         {err && <div className="text-destructive text-sm">{err}</div>}
-        <button disabled={loading} type="submit" className="w-full bg-foreground text-background py-3 text-xs uppercase tracking-[0.2em] hover:bg-clay transition-colors disabled:opacity-50">
+        <button
+          disabled={loading}
+          type="submit"
+          className="w-full bg-foreground text-background py-3 text-xs uppercase tracking-[0.2em] hover:bg-clay transition-colors disabled:opacity-50"
+        >
           {loading ? "Aguarde…" : mode === "login" ? "Entrar" : "Cadastrar"}
         </button>
       </form>
-      <button onClick={() => setMode(mode === "login" ? "signup" : "login")} className="mt-6 text-sm text-muted-foreground hover:text-clay">
+      <button
+        onClick={() => setMode(mode === "login" ? "signup" : "login")}
+        className="mt-6 text-sm text-muted-foreground hover:text-clay"
+      >
         {mode === "login" ? "Não tem conta? Cadastre-se" : "Já tem conta? Entrar"}
       </button>
     </div>
   );
 }
 
-function NotAdmin({ email, userId, onPromoted }: { email: string; userId: string; onPromoted: () => void }) {
+function NotAdmin({
+  email,
+  userId,
+  onPromoted,
+}: {
+  email: string;
+  userId: string;
+  onPromoted: () => void;
+}) {
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState("");
 
   async function tornarAdmin() {
-    setLoading(true); setMsg("");
+    setLoading(true);
+    setMsg("");
     // Permite virar admin se ainda não houver nenhum admin no sistema
-    const { count } = await supabase.from("user_roles").select("*", { count: "exact", head: true }).eq("role", "admin");
+    const { count } = await supabase
+      .from("user_roles")
+      .select("*", { count: "exact", head: true })
+      .eq("role", "admin");
     if ((count ?? 0) > 0) {
       setMsg("Já existe um administrador. Peça para ele te dar acesso pelo banco de dados.");
       setLoading(false);
@@ -157,13 +218,21 @@ function NotAdmin({ email, userId, onPromoted }: { email: string; userId: string
     <div className="max-w-xl mx-auto pt-12 text-center">
       <h1 className="font-display text-4xl mb-4">Acesso restrito</h1>
       <p className="text-muted-foreground mb-8">
-        Sua conta <strong className="text-foreground">{email}</strong> não tem permissão de administrador.
+        Sua conta <strong className="text-foreground">{email}</strong> não tem permissão de
+        administrador.
       </p>
-      <button onClick={tornarAdmin} disabled={loading} className="bg-clay text-paper px-6 py-3 text-xs uppercase tracking-[0.2em] hover:bg-ochre hover:text-ink transition-colors disabled:opacity-50">
+      <button
+        onClick={tornarAdmin}
+        disabled={loading}
+        className="bg-clay text-paper px-6 py-3 text-xs uppercase tracking-[0.2em] hover:bg-ochre hover:text-ink transition-colors disabled:opacity-50"
+      >
         {loading ? "Verificando…" : "Sou o primeiro admin do sistema"}
       </button>
       {msg && <div className="mt-6 text-sm text-destructive">{msg}</div>}
-      <button onClick={() => supabase.auth.signOut()} className="block mx-auto mt-8 text-sm text-muted-foreground hover:text-clay">
+      <button
+        onClick={() => supabase.auth.signOut()}
+        className="block mx-auto mt-8 text-sm text-muted-foreground hover:text-clay"
+      >
         Sair
       </button>
     </div>
@@ -177,17 +246,44 @@ function Dashboard({ user }: { user: User }) {
 
   async function load() {
     const [postsRes, podcastsRes] = await Promise.all([
-      supabase.from("posts").select("id, titulo, slug, categoria, publicado, published_at, autor").order("created_at", { ascending: false }),
-      supabase.from("podcasts").select("id, titulo, slug, categoria, publicado, published_at, autor").order("created_at", { ascending: false })
+      supabase
+        .from("posts")
+        .select("id, titulo, slug, categoria, publicado, published_at, autor")
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("podcasts")
+        .select("id, titulo, slug, categoria, publicado, published_at, autor")
+        .order("created_at", { ascending: false }),
     ]);
     const allPosts = [...(postsRes.data ?? []), ...(podcastsRes.data ?? [])];
     setPosts(allPosts);
   }
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, []);
 
-  if (editing) return <PostEditor post={editing === "new" ? null : editing} user={user} onClose={() => { setEditing(null); load(); }} />;
-  
-  if (showPodcastEditor) return <PodcastEditor user={user} onClose={() => { setShowPodcastEditor(false); load(); }} />;
+  if (editing)
+    return (
+      <PostEditor
+        post={editing === "new" ? null : editing}
+        user={user}
+        onClose={() => {
+          setEditing(null);
+          load();
+        }}
+      />
+    );
+
+  if (showPodcastEditor)
+    return (
+      <PodcastEditor
+        user={user}
+        onClose={() => {
+          setShowPodcastEditor(false);
+          load();
+        }}
+      />
+    );
 
   return (
     <>
@@ -199,52 +295,89 @@ function Dashboard({ user }: { user: User }) {
           <h1 className="font-display text-5xl md:text-6xl tracking-tight">Postagens</h1>
         </div>
         <div className="flex items-center gap-4">
-          <button onClick={() => setShowPodcastEditor(true)} className="bg-clay text-paper px-5 py-3 text-xs uppercase tracking-[0.2em] hover:bg-ochre hover:text-ink transition-colors rounded">
+          <button
+            onClick={() => setShowPodcastEditor(true)}
+            className="bg-clay text-paper px-5 py-3 text-xs uppercase tracking-[0.2em] hover:bg-ochre hover:text-ink transition-colors rounded"
+          >
             + Novo Podcast
           </button>
-          <button onClick={() => setEditing("new")} className="bg-secondary text-foreground px-5 py-3 text-xs uppercase tracking-[0.2em] hover:bg-clay/20 transition-colors">
+          <button
+            onClick={() => setEditing("new")}
+            className="bg-secondary text-foreground px-5 py-3 text-xs uppercase tracking-[0.2em] hover:bg-clay/20 transition-colors"
+          >
             + Nova postagem
           </button>
-          <button onClick={() => supabase.auth.signOut()} className="text-xs uppercase tracking-[0.2em] text-muted-foreground hover:text-clay">
+          <button
+            onClick={() => supabase.auth.signOut()}
+            className="text-xs uppercase tracking-[0.2em] text-muted-foreground hover:text-clay"
+          >
             Sair
           </button>
         </div>
       </div>
 
       <div className="border-t border-border">
-        {posts.length === 0 && <div className="py-20 text-center text-muted-foreground">Nenhuma postagem ainda. Crie a primeira!</div>}
+        {posts.length === 0 && (
+          <div className="py-20 text-center text-muted-foreground">
+            Nenhuma postagem ainda. Crie a primeira!
+          </div>
+        )}
         {posts.map((p) => (
-          <div key={p.id} className="grid grid-cols-12 gap-4 items-center py-5 border-b border-border">
+          <div
+            key={p.id}
+            className="grid grid-cols-12 gap-4 items-center py-5 border-b border-border"
+          >
             <div className="col-span-12 md:col-span-6">
               <div className="font-display text-xl">{p.titulo}</div>
               <div className="text-xs text-muted-foreground font-mono mt-1">/{p.slug}</div>
             </div>
-            <div className="col-span-4 md:col-span-2 text-xs uppercase tracking-wider">{p.categoria}</div>
+            <div className="col-span-4 md:col-span-2 text-xs uppercase tracking-wider">
+              {p.categoria}
+            </div>
             <div className="col-span-4 md:col-span-2">
-              <span className={`text-xs uppercase tracking-wider px-2 py-1 ${p.publicado ? "bg-sertao/20 text-sertao" : "bg-muted text-muted-foreground"}`}>
+              <span
+                className={`text-xs uppercase tracking-wider px-2 py-1 ${p.publicado ? "bg-sertao/20 text-sertao" : "bg-muted text-muted-foreground"}`}
+              >
                 {p.publicado ? "Publicado" : "Rascunho"}
               </span>
             </div>
             <div className="col-span-4 md:col-span-2 flex justify-end gap-3">
-              <button onClick={() => setEditing(p)} className="text-sm text-clay hover:underline">Editar</button>
-              <button onClick={async () => {
-                if (!confirm("Excluir esta postagem?")) return;
-                await supabase.from("posts").delete().eq("id", p.id);
-                load();
-              }} className="text-sm text-destructive hover:underline">Excluir</button>
+              <button onClick={() => setEditing(p)} className="text-sm text-clay hover:underline">
+                Editar
+              </button>
+              <button
+                onClick={async () => {
+                  if (!confirm("Excluir esta postagem?")) return;
+                  await supabase.from("posts").delete().eq("id", p.id);
+                  load();
+                }}
+                className="text-sm text-destructive hover:underline"
+              >
+                Excluir
+              </button>
             </div>
           </div>
         ))}
       </div>
 
       <div className="mt-10">
-        <Link to="/blog" className="text-sm text-muted-foreground hover:text-clay">→ Ver blog público</Link>
+        <Link to="/blog" className="text-sm text-muted-foreground hover:text-clay">
+          → Ver blog público
+        </Link>
       </div>
     </>
   );
 }
 
-function PostEditor({ post, user, onClose }: { post: Post | null; user: User; onClose: () => void }) {
+function PostEditor({
+  post,
+  user,
+  onClose,
+}: {
+  post: Post | null;
+  user: User;
+  onClose: () => void;
+}) {
   const [titulo, setTitulo] = useState("");
   const [slug, setSlug] = useState("");
   const [excerpt, setExcerpt] = useState("");
@@ -259,7 +392,7 @@ function PostEditor({ post, user, onClose }: { post: Post | null; user: User; on
   const [uploading, setUploading] = useState(false);
   const [err, setErr] = useState("");
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
-  const [autoSaveKey] = useState(() => `draft-${post?.id || 'new'}`);
+  const [autoSaveKey] = useState(() => `draft-${post?.id || "new"}`);
 
   useEffect(() => {
     const saved = localStorage.getItem(autoSaveKey);
@@ -287,27 +420,38 @@ function PostEditor({ post, user, onClose }: { post: Post | null; user: User; on
   useEffect(() => {
     if (!post) return;
     const table = post.categoria === "podcast" ? "podcasts" : "posts";
-    const fields = post.categoria === "podcast" ? "excerpt, conteudo, capa_url, imagens, audio_url" : "excerpt, conteudo, capa_url, imagens";
-    supabase.from(table).select(fields).eq("id", post.id).single().then(({ data }) => {
-      if (data) {
-        setExcerpt(data.excerpt ?? "");
-        setConteudo(data.conteudo ?? "");
-        setCapaUrl(data.capa_url);
-        setImagens(data.imagens ?? []);
-        if (data.audio_url !== undefined) setAudioUrl(data.audio_url ?? null);
-        localStorage.setItem(autoSaveKey, JSON.stringify({
-          titulo: post.titulo,
-          slug: post.slug,
-          excerpt: data.excerpt ?? "",
-          conteudo: data.conteudo ?? "",
-          categoria: post.categoria,
-          autor: post.autor ?? "",
-          capa_url: data.capa_url,
-          imagens: data.imagens ?? [],
-          publicado: post.publicado
-        }));
-      }
-    });
+    const fields =
+      post.categoria === "podcast"
+        ? "excerpt, conteudo, capa_url, imagens, audio_url"
+        : "excerpt, conteudo, capa_url, imagens";
+    supabase
+      .from(table)
+      .select(fields)
+      .eq("id", post.id)
+      .single()
+      .then(({ data }) => {
+        if (data) {
+          setExcerpt(data.excerpt ?? "");
+          setConteudo(data.conteudo ?? "");
+          setCapaUrl(data.capa_url);
+          setImagens(data.imagens ?? []);
+          if (data.audio_url !== undefined) setAudioUrl(data.audio_url ?? null);
+          localStorage.setItem(
+            autoSaveKey,
+            JSON.stringify({
+              titulo: post.titulo,
+              slug: post.slug,
+              excerpt: data.excerpt ?? "",
+              conteudo: data.conteudo ?? "",
+              categoria: post.categoria,
+              autor: post.autor ?? "",
+              capa_url: data.capa_url,
+              imagens: data.imagens ?? [],
+              publicado: post.publicado,
+            }),
+          );
+        }
+      });
   }, [post, autoSaveKey]);
 
   useEffect(() => {
@@ -315,39 +459,86 @@ function PostEditor({ post, user, onClose }: { post: Post | null; user: User; on
   }, [titulo, post]);
 
   useEffect(() => {
-    localStorage.setItem(autoSaveKey, JSON.stringify({ titulo, slug, excerpt, conteudo, categoria, autor, capa_url: capaUrl, imagens, audio_url: audioUrl, publicado }));
-  }, [titulo, slug, excerpt, conteudo, categoria, autor, capaUrl, imagens, audioUrl, publicado, autoSaveKey]);
+    localStorage.setItem(
+      autoSaveKey,
+      JSON.stringify({
+        titulo,
+        slug,
+        excerpt,
+        conteudo,
+        categoria,
+        autor,
+        capa_url: capaUrl,
+        imagens,
+        audio_url: audioUrl,
+        publicado,
+      }),
+    );
+  }, [
+    titulo,
+    slug,
+    excerpt,
+    conteudo,
+    categoria,
+    autor,
+    capaUrl,
+    imagens,
+    audioUrl,
+    publicado,
+    autoSaveKey,
+  ]);
 
   async function uploadCapa(file: File) {
-    setUploading(true); setErr("");
+    setUploading(true);
+    setErr("");
     const ext = file.name.split(".").pop();
     const path = `${user.id}/${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from("post-images").upload(path, file, { upsert: false });
-    if (error) { setErr(error.message); setUploading(false); return; }
+    const { error } = await supabase.storage
+      .from("post-images")
+      .upload(path, file, { upsert: false });
+    if (error) {
+      setErr(error.message);
+      setUploading(false);
+      return;
+    }
     const { data } = supabase.storage.from("post-images").getPublicUrl(path);
     setCapaUrl(data.publicUrl);
     setUploading(false);
   }
 
   async function uploadAudio(file: File) {
-    setUploading(true); setErr("");
+    setUploading(true);
+    setErr("");
     const ext = file.name.split(".").pop();
     const path = `${user.id}/audio/${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from("post-images").upload(path, file, { upsert: false });
-    if (error) { setErr(error.message); setUploading(false); return; }
+    const { error } = await supabase.storage
+      .from("post-images")
+      .upload(path, file, { upsert: false });
+    if (error) {
+      setErr(error.message);
+      setUploading(false);
+      return;
+    }
     const { data } = supabase.storage.from("post-images").getPublicUrl(path);
     setAudioUrl(data.publicUrl);
     setUploading(false);
   }
 
   async function uploadImagem(file: File): Promise<string | null> {
-    setUploading(true); setErr("");
+    setUploading(true);
+    setErr("");
     const ext = file.name.split(".").pop();
     const path = `${user.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
     console.log("Uploading to:", path);
-    const { error } = await supabase.storage.from("post-images").upload(path, file, { upsert: false });
+    const { error } = await supabase.storage
+      .from("post-images")
+      .upload(path, file, { upsert: false });
     console.log("Upload error:", error);
-    if (error) { setErr(error.message); setUploading(false); return null; }
+    if (error) {
+      setErr(error.message);
+      setUploading(false);
+      return null;
+    }
     const { data } = supabase.storage.from("post-images").getPublicUrl(path);
     console.log("Public URL:", data.publicUrl);
     setUploading(false);
@@ -367,7 +558,8 @@ function PostEditor({ post, user, onClose }: { post: Post | null; user: User; on
 
   async function save(e: FormEvent) {
     e.preventDefault();
-    setSaving(true); setErr("");
+    setSaving(true);
+    setErr("");
     console.log("Saving images:", imagens);
     const isPodcast = categoria === "podcast";
     const payload = {
@@ -401,13 +593,28 @@ function PostEditor({ post, user, onClose }: { post: Post | null; user: User; on
   return (
     <form onSubmit={save}>
       <div className="flex items-center justify-between mb-10">
-        <button type="button" onClick={onClose} className="text-sm text-muted-foreground hover:text-clay">← Voltar</button>
+        <button
+          type="button"
+          onClick={onClose}
+          className="text-sm text-muted-foreground hover:text-clay"
+        >
+          ← Voltar
+        </button>
         <div className="flex items-center gap-4">
           <label className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] cursor-pointer">
-            <input type="checkbox" checked={publicado} onChange={(e) => setPublicado(e.target.checked)} className="accent-clay h-4 w-4" />
+            <input
+              type="checkbox"
+              checked={publicado}
+              onChange={(e) => setPublicado(e.target.checked)}
+              className="accent-clay h-4 w-4"
+            />
             Publicado
           </label>
-          <button disabled={saving} type="submit" className="bg-clay text-paper px-6 py-3 text-xs uppercase tracking-[0.2em] hover:bg-ochre hover:text-ink transition-colors disabled:opacity-50">
+          <button
+            disabled={saving}
+            type="submit"
+            className="bg-clay text-paper px-6 py-3 text-xs uppercase tracking-[0.2em] hover:bg-ochre hover:text-ink transition-colors disabled:opacity-50"
+          >
             {saving ? "Salvando…" : "Salvar"}
           </button>
         </div>
@@ -415,17 +622,37 @@ function PostEditor({ post, user, onClose }: { post: Post | null; user: User; on
 
       <div className="space-y-8">
         <div>
-          <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground block mb-2">Título</label>
-          <input value={titulo} onChange={(e) => setTitulo(e.target.value)} required className="w-full bg-transparent border-b border-border focus:border-clay outline-none py-2 font-display text-3xl md:text-5xl" />
+          <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground block mb-2">
+            Título
+          </label>
+          <input
+            value={titulo}
+            onChange={(e) => setTitulo(e.target.value)}
+            required
+            className="w-full bg-transparent border-b border-border focus:border-clay outline-none py-2 font-display text-3xl md:text-5xl"
+          />
         </div>
         <div className="grid md:grid-cols-3 gap-6">
           <div>
-            <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground block mb-2">Slug (URL)</label>
-            <input value={slug} onChange={(e) => setSlug(slugify(e.target.value))} required className="w-full bg-transparent border-b border-border focus:border-clay outline-none py-2 font-mono text-sm" />
+            <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground block mb-2">
+              Slug (URL)
+            </label>
+            <input
+              value={slug}
+              onChange={(e) => setSlug(slugify(e.target.value))}
+              required
+              className="w-full bg-transparent border-b border-border focus:border-clay outline-none py-2 font-mono text-sm"
+            />
           </div>
           <div>
-            <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground block mb-2">Categoria</label>
-            <select value={categoria} onChange={(e) => setCategoria(e.target.value)} className="w-full bg-transparent border-b border-border focus:border-clay outline-none py-2">
+            <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground block mb-2">
+              Categoria
+            </label>
+            <select
+              value={categoria}
+              onChange={(e) => setCategoria(e.target.value)}
+              className="w-full bg-transparent border-b border-border focus:border-clay outline-none py-2"
+            >
               <option value="noticia">Notícia</option>
               <option value="oficina">Oficina</option>
               <option value="evento">Evento</option>
@@ -433,39 +660,75 @@ function PostEditor({ post, user, onClose }: { post: Post | null; user: User; on
             </select>
           </div>
           <div>
-            <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground block mb-2">Autor</label>
-            <input value={autor} onChange={(e) => setAutor(e.target.value)} className="w-full bg-transparent border-b border-border focus:border-clay outline-none py-2" />
+            <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground block mb-2">
+              Autor
+            </label>
+            <input
+              value={autor}
+              onChange={(e) => setAutor(e.target.value)}
+              className="w-full bg-transparent border-b border-border focus:border-clay outline-none py-2"
+            />
           </div>
         </div>
 
         <div>
-          <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground block mb-2">Imagem de capa</label>
+          <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground block mb-2">
+            Imagem de capa
+          </label>
           {capaUrl && (
-            <img src={capaUrl} alt="capa" className="mb-3 max-h-64 w-auto object-cover border border-border" />
+            <img
+              src={capaUrl}
+              alt="capa"
+              className="mb-3 max-h-64 w-auto object-cover border border-border"
+            />
           )}
-          <input type="file" accept="image/*" onChange={(e) => e.target.files?.[0] && uploadCapa(e.target.files[0])} className="block text-sm" />
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => e.target.files?.[0] && uploadCapa(e.target.files[0])}
+            className="block text-sm"
+          />
           {uploading && <div className="text-xs text-muted-foreground mt-2">Enviando…</div>}
           {capaUrl && (
-            <button type="button" onClick={() => setCapaUrl(null)} className="text-xs text-destructive hover:underline mt-2">
+            <button
+              type="button"
+              onClick={() => setCapaUrl(null)}
+              className="text-xs text-destructive hover:underline mt-2"
+            >
               Remover imagem
             </button>
           )}
         </div>
 
         <div>
-          <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground block mb-2">Galeria de imagens</label>
+          <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground block mb-2">
+            Galeria de imagens
+          </label>
           <div className="grid grid-cols-4 gap-3 mb-3">
             {imagens.map((url, i) => (
               <div key={i} className="relative group">
-                <img src={url} alt={`Imagem ${i + 1}`} className="w-full h-24 object-cover border border-border" />
-                <button type="button" onClick={() => removerImagem(i)} className="absolute top-1 right-1 bg-destructive text-white text-xs px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <img
+                  src={url}
+                  alt={`Imagem ${i + 1}`}
+                  className="w-full h-24 object-cover border border-border"
+                />
+                <button
+                  type="button"
+                  onClick={() => removerImagem(i)}
+                  className="absolute top-1 right-1 bg-destructive text-white text-xs px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                >
                   ×
                 </button>
               </div>
             ))}
           </div>
           <label className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] cursor-pointer text-clay hover:text-ochre transition-colors">
-            <input type="file" accept="image/*" onChange={(e) => e.target.files?.[0] && handleAddImagem(e.target.files[0])} className="hidden" />
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => e.target.files?.[0] && handleAddImagem(e.target.files[0])}
+              className="hidden"
+            />
             + Adicionar imagem
           </label>
           {uploading && <div className="text-xs text-muted-foreground mt-2">Enviando…</div>}
@@ -473,10 +736,19 @@ function PostEditor({ post, user, onClose }: { post: Post | null; user: User; on
 
         {categoria === "podcast" && (
           <div className="bg-clay/10 border border-clay/30 rounded-lg p-6">
-            <div className="text-xs uppercase tracking-[0.2em] text-clay mb-4">🎙️ Arquivo de Áudio</div>
+            <div className="text-xs uppercase tracking-[0.2em] text-clay mb-4">
+              🎙️ Arquivo de Áudio
+            </div>
             <div>
-              <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground block mb-2">Upload de áudio (MP3, WAV, OGG)</label>
-              <input type="file" accept="audio/*" onChange={(e) => e.target.files?.[0] && uploadAudio(e.target.files[0])} className="block text-sm" />
+              <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground block mb-2">
+                Upload de áudio (MP3, WAV, OGG)
+              </label>
+              <input
+                type="file"
+                accept="audio/*"
+                onChange={(e) => e.target.files?.[0] && uploadAudio(e.target.files[0])}
+                className="block text-sm"
+              />
               {uploading && <div className="text-xs text-muted-foreground mt-2">Enviando…</div>}
             </div>
             {audioUrl && (
@@ -490,29 +762,52 @@ function PostEditor({ post, user, onClose }: { post: Post | null; user: User; on
                     </div>
                     <div>
                       <div className="text-sm font-medium">Áudio carregado</div>
-                      <div className="text-xs text-muted-foreground truncate max-w-[200px]">{audioUrl.split('/').pop()}</div>
+                      <div className="text-xs text-muted-foreground truncate max-w-[200px]">
+                        {audioUrl.split("/").pop()}
+                      </div>
                     </div>
                   </div>
-                  <button type="button" onClick={() => setAudioUrl(null)} className="text-xs text-destructive hover:underline">
+                  <button
+                    type="button"
+                    onClick={() => setAudioUrl(null)}
+                    className="text-xs text-destructive hover:underline"
+                  >
                     Remover
                   </button>
                 </div>
               </div>
             )}
             <div className="mt-4 text-xs text-muted-foreground">
-              O áudio também pode ser adicionado no conteúdo usando uma URL direta (ex: https://exemplo.com/audio.mp3)
+              O áudio também pode ser adicionado no conteúdo usando uma URL direta (ex:
+              https://exemplo.com/audio.mp3)
             </div>
           </div>
         )}
 
         <div>
-          <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground block mb-2">Resumo (excerpt)</label>
-          <textarea value={excerpt} onChange={(e) => setExcerpt(e.target.value)} rows={2} maxLength={300} className="w-full bg-transparent border border-border focus:border-clay outline-none p-3 italic" />
+          <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground block mb-2">
+            Resumo (excerpt)
+          </label>
+          <textarea
+            value={excerpt}
+            onChange={(e) => setExcerpt(e.target.value)}
+            rows={2}
+            maxLength={300}
+            className="w-full bg-transparent border border-border focus:border-clay outline-none p-3 italic"
+          />
         </div>
 
         <div>
-          <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground block mb-2">Conteúdo</label>
-          <textarea value={conteudo} onChange={(e) => setConteudo(e.target.value)} required rows={20} className="w-full bg-transparent border border-border focus:border-clay outline-none p-4 leading-relaxed text-lg" />
+          <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground block mb-2">
+            Conteúdo
+          </label>
+          <textarea
+            value={conteudo}
+            onChange={(e) => setConteudo(e.target.value)}
+            required
+            rows={20}
+            className="w-full bg-transparent border border-border focus:border-clay outline-none p-4 leading-relaxed text-lg"
+          />
         </div>
 
         {err && <div className="text-destructive text-sm">{err}</div>}
@@ -540,11 +835,14 @@ function PodcastEditor({ user, onClose }: { user: User; onClose: () => void }) {
   }, [titulo]);
 
   async function uploadCapa(file: File) {
-    setUploading(true); setErr("");
+    setUploading(true);
+    setErr("");
     try {
       const ext = file.name.split(".").pop();
       const path = `${user.id}/podcast/${Date.now()}.${ext}`;
-      const { error } = await supabase.storage.from("post-images").upload(path, file, { upsert: false });
+      const { error } = await supabase.storage
+        .from("post-images")
+        .upload(path, file, { upsert: false });
       if (error) throw error;
       const { data } = supabase.storage.from("post-images").getPublicUrl(path);
       setCapaUrl(data.publicUrl);
@@ -555,11 +853,14 @@ function PodcastEditor({ user, onClose }: { user: User; onClose: () => void }) {
   }
 
   async function uploadAudio(file: File) {
-    setUploading(true); setErr("");
+    setUploading(true);
+    setErr("");
     try {
       const ext = file.name.split(".").pop();
       const path = `${user.id}/podcast/audio/${Date.now()}.${ext}`;
-      const { error } = await supabase.storage.from("post-images").upload(path, file, { upsert: false });
+      const { error } = await supabase.storage
+        .from("post-images")
+        .upload(path, file, { upsert: false });
       if (error) throw error;
       const { data } = supabase.storage.from("post-images").getPublicUrl(path);
       setAudioUrl(data.publicUrl);
@@ -571,8 +872,9 @@ function PodcastEditor({ user, onClose }: { user: User; onClose: () => void }) {
 
   async function save(e: FormEvent) {
     e.preventDefault();
-    setSaving(true); setErr("");
-    
+    setSaving(true);
+    setErr("");
+
     if (!audioUrl) {
       setErr("Por favor, adicione um arquivo de áudio para o podcast.");
       setSaving(false);
@@ -594,7 +896,7 @@ function PodcastEditor({ user, onClose }: { user: User; onClose: () => void }) {
 
     const { error } = await supabase.from("podcasts").insert(payload);
     setSaving(false);
-    
+
     if (error) {
       setErr(error.message);
     } else {
@@ -608,14 +910,14 @@ function PodcastEditor({ user, onClose }: { user: User; onClose: () => void }) {
         <button onClick={onClose} className="text-sm text-muted-foreground hover:text-clay">
           ← Voltar
         </button>
-        <div className="text-xs uppercase tracking-[0.2em] text-clay">
-          🎙️ Novo Podcast
-        </div>
+        <div className="text-xs uppercase tracking-[0.2em] text-clay">🎙️ Novo Podcast</div>
       </div>
 
       <form onSubmit={save} className="space-y-6">
         <div>
-          <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground block mb-2">Título do Episódio</label>
+          <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground block mb-2">
+            Título do Episódio
+          </label>
           <input
             value={titulo}
             onChange={(e) => setTitulo(e.target.value)}
@@ -627,7 +929,9 @@ function PodcastEditor({ user, onClose }: { user: User; onClose: () => void }) {
 
         <div className="grid md:grid-cols-2 gap-4">
           <div>
-            <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground block mb-2">Autor/Apresentador</label>
+            <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground block mb-2">
+              Autor/Apresentador
+            </label>
             <input
               value={autor}
               onChange={(e) => setAutor(e.target.value)}
@@ -636,7 +940,9 @@ function PodcastEditor({ user, onClose }: { user: User; onClose: () => void }) {
             />
           </div>
           <div>
-            <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground block mb-2">Slug</label>
+            <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground block mb-2">
+              Slug
+            </label>
             <input
               value={slug}
               onChange={(e) => setSlug(slugify(e.target.value))}
@@ -649,7 +955,7 @@ function PodcastEditor({ user, onClose }: { user: User; onClose: () => void }) {
           <div className="text-xs uppercase tracking-[0.2em] text-clay mb-3 font-semibold">
             🎙️ Arquivo de Áudio *
           </div>
-          
+
           {!audioUrl ? (
             <div className="border-2 border-dashed border-clay/30 rounded-lg p-6 text-center">
               <input
@@ -677,7 +983,11 @@ function PodcastEditor({ user, onClose }: { user: User; onClose: () => void }) {
                 </div>
                 <span className="text-sm truncate max-w-[150px]">{audioUrl.split("/").pop()}</span>
               </div>
-              <button type="button" onClick={() => setAudioUrl(null)} className="text-xs text-destructive hover:underline">
+              <button
+                type="button"
+                onClick={() => setAudioUrl(null)}
+                className="text-xs text-destructive hover:underline"
+              >
                 Remover
               </button>
             </div>
@@ -685,11 +995,21 @@ function PodcastEditor({ user, onClose }: { user: User; onClose: () => void }) {
         </div>
 
         <div>
-          <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground block mb-2">Imagem de Capa</label>
+          <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground block mb-2">
+            Imagem de Capa
+          </label>
           {capaUrl ? (
             <div className="relative inline-block mb-2">
-              <img src={capaUrl} alt="capa" className="max-h-32 w-auto rounded border border-border" />
-              <button type="button" onClick={() => setCapaUrl(null)} className="absolute top-1 right-1 bg-destructive text-white text-xs px-2 py-1 rounded">
+              <img
+                src={capaUrl}
+                alt="capa"
+                className="max-h-32 w-auto rounded border border-border"
+              />
+              <button
+                type="button"
+                onClick={() => setCapaUrl(null)}
+                className="absolute top-1 right-1 bg-destructive text-white text-xs px-2 py-1 rounded"
+              >
                 ×
               </button>
             </div>
@@ -705,7 +1025,9 @@ function PodcastEditor({ user, onClose }: { user: User; onClose: () => void }) {
         </div>
 
         <div>
-          <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground block mb-2">Descrição Curta</label>
+          <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground block mb-2">
+            Descrição Curta
+          </label>
           <textarea
             value={excerpt}
             onChange={(e) => setExcerpt(e.target.value)}
@@ -716,7 +1038,9 @@ function PodcastEditor({ user, onClose }: { user: User; onClose: () => void }) {
         </div>
 
         <div>
-          <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground block mb-2">Descrição Completa</label>
+          <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground block mb-2">
+            Descrição Completa
+          </label>
           <textarea
             value={conteudo}
             onChange={(e) => setConteudo(e.target.value)}
@@ -729,7 +1053,11 @@ function PodcastEditor({ user, onClose }: { user: User; onClose: () => void }) {
         {err && <div className="text-destructive text-sm bg-destructive/10 p-3 rounded">{err}</div>}
 
         <div className="flex items-center justify-between pt-4 border-t border-border">
-          <button type="button" onClick={onClose} className="text-sm text-muted-foreground hover:text-clay">
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-sm text-muted-foreground hover:text-clay"
+          >
             Cancelar
           </button>
           <div className="flex items-center gap-4">

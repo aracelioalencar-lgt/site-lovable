@@ -31,7 +31,9 @@ function ProjetosPage() {
   useEffect(() => {
     supabase
       .from("podcasts")
-      .select("id, titulo, slug, excerpt, capa_url, categoria, autor, published_at, imagens, audio_url")
+      .select(
+        "id, titulo, slug, excerpt, capa_url, categoria, autor, published_at, imagens, audio_url",
+      )
       .eq("publicado", true)
       .order("published_at", { ascending: false })
       .then(({ data }) => {
@@ -43,15 +45,15 @@ function ProjetosPage() {
   const handlePlay = (e: React.MouseEvent, id: string, audioUrl: string) => {
     e.stopPropagation();
     e.preventDefault();
-    
+
     const audio = document.getElementById(`audio-${id}`) as HTMLAudioElement;
     if (!audio) return;
-    
+
     if (playing === id) {
       audio.pause();
       setPlaying(null);
     } else {
-      document.querySelectorAll('audio').forEach((a) => (a as HTMLAudioElement).pause());
+      document.querySelectorAll("audio").forEach((a) => (a as HTMLAudioElement).pause());
       audio.play();
       setPlaying(id);
     }
@@ -61,7 +63,7 @@ function ProjetosPage() {
     const audio = document.getElementById(`audio-${id}`) as HTMLAudioElement;
     if (audio) {
       const percent = (audio.currentTime / audio.duration) * 100;
-      setProgress(prev => ({ ...prev, [id]: percent }));
+      setProgress((prev) => ({ ...prev, [id]: percent }));
     }
   };
 
@@ -78,7 +80,7 @@ function ProjetosPage() {
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
   return (
@@ -101,15 +103,16 @@ function ProjetosPage() {
             Projetos<span className="text-clay">.</span>
           </h1>
           <p className="mt-8 max-w-2xl text-lg text-muted-foreground leading-relaxed">
-            Vozes do sertão, histórias contadas e sons que ecoam na caatinga.
-            Um projeto de comunicação comunitária.
+            Vozes do sertão, histórias contadas e sons que ecoam na caatinga. Um projeto de
+            comunicação comunitária.
           </p>
 
           <div className="mt-12 flex items-center gap-3">
             <div className="flex items-center gap-2 text-clay">
               <div className="w-3 h-3 rounded-full bg-clay animate-pulse" />
               <span className="text-xs uppercase tracking-[0.2em]">
-                {podcasts.length} episódio{podcasts.length !== 1 ? "s" : ""} disponível{podcasts.length !== 1 ? "s" : ""}
+                {podcasts.length} episódio{podcasts.length !== 1 ? "s" : ""} disponível
+                {podcasts.length !== 1 ? "s" : ""}
               </span>
             </div>
           </div>
@@ -143,7 +146,7 @@ function ProjetosPage() {
                     onTimeUpdate={() => handleTimeUpdate(p.id)}
                     onEnded={handleEnded}
                   />
-                  
+
                   <div className="relative aspect-[4/3] overflow-hidden">
                     {p.capa_url ? (
                       <img
@@ -157,18 +160,18 @@ function ProjetosPage() {
                         <div className="text-8xl">🎙️</div>
                       </div>
                     )}
-                    
+
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                    
+
                     {audioUrl && (
                       <div className="absolute bottom-4 left-4 right-4">
                         <div className="bg-black/60 backdrop-blur-sm rounded-full p-1 pr-3 flex items-center gap-3">
                           <button
                             onClick={(e) => handlePlay(e, p.id, audioUrl)}
                             className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
-                              isPlaying 
-                                ? 'bg-ochre text-ink' 
-                                : 'bg-clay text-paper hover:bg-ochre hover:text-ink'
+                              isPlaying
+                                ? "bg-ochre text-ink"
+                                : "bg-clay text-paper hover:bg-ochre hover:text-ink"
                             }`}
                           >
                             {isPlaying ? (
@@ -176,14 +179,18 @@ function ProjetosPage() {
                                 <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
                               </svg>
                             ) : (
-                              <svg className="w-4 h-4 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                              <svg
+                                className="w-4 h-4 ml-0.5"
+                                fill="currentColor"
+                                viewBox="0 0 24 24"
+                              >
                                 <path d="M8 5v14l11-7z" />
                               </svg>
                             )}
                           </button>
                           <div className="flex-1 min-w-0">
                             <div className="h-1.5 bg-white/20 rounded-full overflow-hidden">
-                              <div 
+                              <div
                                 className="h-full bg-clay rounded-full transition-all duration-300"
                                 style={{ width: `${progress[p.id] || 0}%` }}
                               />
@@ -192,14 +199,14 @@ function ProjetosPage() {
                         </div>
                       </div>
                     )}
-                    
+
                     <div className="absolute top-4 left-4">
                       <span className="bg-clay/90 text-paper text-xs font-mono px-3 py-1.5 uppercase tracking-wider rounded-full backdrop-blur-sm">
                         🎧 Podcast
                       </span>
                     </div>
                   </div>
-                  
+
                   <div className="p-5">
                     <div className="flex items-center gap-3 text-xs text-muted-foreground mb-3">
                       <span className="font-mono text-clay/80">
@@ -218,20 +225,26 @@ function ProjetosPage() {
                         </>
                       )}
                     </div>
-                    
+
                     <h2 className="font-display text-xl md:text-2xl leading-tight mb-3 group-hover:text-clay transition-colors line-clamp-2">
                       {p.titulo}
                     </h2>
-                    
+
                     {p.excerpt && (
                       <p className="text-muted-foreground text-sm leading-relaxed line-clamp-2">
                         {p.excerpt}
                       </p>
                     )}
-                    
+
                     <div className="mt-4 pt-4 border-t border-border/50 flex items-center justify-between">
                       {audioUrl && (
-                        <a href="https://orizonn.com.br/blog/o-uso-da-ia-na-producao-cultural" target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="text-xs text-clay/70 flex items-center gap-1 hover:text-clay transition-colors">
+                        <a
+                          href="https://orizonn.com.br/blog/o-uso-da-ia-na-producao-cultural"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="text-xs text-clay/70 flex items-center gap-1 hover:text-clay transition-colors"
+                        >
                           <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z" />
                           </svg>

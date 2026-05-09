@@ -14,17 +14,43 @@ export function Nav() {
           <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">
             Início
           </Link>
-          <Link to="/blog" className="text-muted-foreground hover:text-foreground transition-colors" activeProps={{ className: "text-foreground" }}>
+          <Link
+            to="/blog"
+            className="text-muted-foreground hover:text-foreground transition-colors"
+            activeProps={{ className: "text-foreground" }}
+          >
             Blog
           </Link>
-          <Link to="/projetos" className="text-muted-foreground hover:text-foreground transition-colors" activeProps={{ className: "text-foreground" }}>
+          <Link
+            to="/projetos"
+            className="text-muted-foreground hover:text-foreground transition-colors"
+            activeProps={{ className: "text-foreground" }}
+          >
             Podcasts
           </Link>
-          <a href="/#oficinas" className="text-muted-foreground hover:text-foreground transition-colors">Oficinas</a>
-          <a href="/#agenda" className="text-muted-foreground hover:text-foreground transition-colors">Agenda</a>
-          <a href="/#sobre" className="text-muted-foreground hover:text-foreground transition-colors">Sobre</a>
+          <a
+            href="/#oficinas"
+            className="text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Oficinas
+          </a>
+          <a
+            href="/#agenda"
+            className="text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Agenda
+          </a>
+          <a
+            href="/#sobre"
+            className="text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Sobre
+          </a>
         </nav>
-        <Link to="/admin" className="text-xs uppercase tracking-[0.2em] border border-foreground px-4 py-2 hover:bg-foreground hover:text-background transition-colors">
+        <Link
+          to="/admin"
+          className="text-xs uppercase tracking-[0.2em] border border-foreground px-4 py-2 hover:bg-foreground hover:text-background transition-colors"
+        >
           Admin
         </Link>
       </div>
