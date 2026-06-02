@@ -28,6 +28,20 @@ export function Nav() {
           >
             Podcasts
           </Link>
+          <Link
+            to="/profissionais"
+            className="text-muted-foreground hover:text-foreground transition-colors"
+            activeProps={{ className: "text-foreground" }}
+          >
+            Profissionais
+          </Link>
+          <Link
+            to="/cadastro-profissional"
+            className="text-muted-foreground hover:text-foreground transition-colors"
+            activeProps={{ className: "text-foreground" }}
+          >
+            Cadastro
+          </Link>
           <a
             href="/#oficinas"
             className="text-muted-foreground hover:text-foreground transition-colors"

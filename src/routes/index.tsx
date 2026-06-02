@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import heroImg from "@/assets/hero-sertao.jpg";
+import heroImg from "@/assets/projeto-forro.png";
 import bordadoImg from "@/assets/oficina-bordado.jpg";
 import bijuteriaImg from "@/assets/oficina-bijuteria.jpg";
 import caretaImg from "@/assets/oficina-careta.jpg";
@@ -90,7 +90,7 @@ function Hero() {
       <div className="absolute inset-0 ken-burns">
         <img
           src={heroImg}
-          alt="Sertão de Triunfo ao entardecer"
+          alt="Projeto Forró"
           className="h-full w-full object-cover"
           width={1920}
           height={1280}
@@ -98,36 +98,7 @@ function Hero() {
       </div>
       <div className="absolute inset-0 bg-gradient-to-b from-ink/30 via-ink/40 to-ink/80" />
       <div className="grain absolute inset-0" />
-      <div className="relative z-10 mx-auto max-w-[1400px] px-6 lg:px-12 h-full flex flex-col justify-between pt-24 pb-16">
-        <div className="flex items-center gap-3 text-paper/80 text-xs uppercase tracking-[0.3em] reveal">
-          <span className="h-px w-10 bg-paper/60" />
-          Triunfo · Pernambuco · Brasil
-        </div>
-        <div className="reveal" style={{ animationDelay: "0.2s" }}>
-          <h1 className="font-display text-paper text-[clamp(3rem,11vw,11rem)] leading-[0.88] tracking-tight">
-            Tramas <span className="italic font-light text-ochre">da</span>
-            <br />
-            diversidade<span className="text-clay">.</span>
-          </h1>
-          <div className="mt-10 flex flex-col md:flex-row md:items-end md:justify-between gap-8">
-            <p className="max-w-md text-paper/85 text-base md:text-lg leading-relaxed">
-              Um projeto cultural que celebra a arte, o artesanato e a poesia do sertão pernambucano
-              — entre o bordado, o cordel e a máscara do careta.
-            </p>
-            <div className="flex items-center gap-6 text-paper/70 text-xs uppercase tracking-[0.25em]">
-              <div>
-                <div className="text-paper text-3xl font-display">12</div>
-                <div className="mt-1">Oficinas ativas</div>
-              </div>
-              <div className="h-12 w-px bg-paper/30" />
-              <div>
-                <div className="text-paper text-3xl font-display">2026</div>
-                <div className="mt-1">Edição atual</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+
     </section>
   );
 }

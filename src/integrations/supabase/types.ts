@@ -149,6 +149,39 @@ export type Database = {
         };
         Relationships: [];
       };
+      profissionais: {
+        Row: {
+          id: string;
+          nome: string;
+          foto_url: string | null;
+          contato: string | null;
+          descricao: string | null;
+          publicado: boolean;
+          criado_em: string;
+          atualizado_em: string;
+        };
+        Insert: {
+          id?: string;
+          nome: string;
+          foto_url?: string | null;
+          contato?: string | null;
+          descricao?: string | null;
+          publicado?: boolean;
+          criado_em?: string;
+          atualizado_em?: string;
+        };
+        Update: {
+          id?: string;
+          nome?: string;
+          foto_url?: string | null;
+          contato?: string | null;
+          descricao?: string | null;
+          publicado?: boolean;
+          criado_em?: string;
+          atualizado_em?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       [_ in never]: never;
