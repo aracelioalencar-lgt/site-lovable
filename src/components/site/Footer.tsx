@@ -42,9 +42,12 @@ export function Footer() {
             <a href="#" className="hover:text-paper">
               YouTube
             </a>
-            <a href="/" className="hover:text-paper">
+            <button
+              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+              className="hover:text-paper"
+            >
               Voltar ao início
-            </a>
+            </button>
           </div>
         </div>
       </div>
