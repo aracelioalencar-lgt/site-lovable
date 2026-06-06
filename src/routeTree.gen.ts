@@ -10,9 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ProjetosRouteImport } from './routes/projetos'
-import { Route as ProfissionaisRouteImport } from './routes/profissionais'
 import { Route as PodcastsRouteImport } from './routes/podcasts'
-import { Route as CadastroProfissionalRouteImport } from './routes/cadastro-profissional'
 import { Route as BlogRouteImport } from './routes/blog'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
@@ -23,19 +21,9 @@ const ProjetosRoute = ProjetosRouteImport.update({
   path: '/projetos',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ProfissionaisRoute = ProfissionaisRouteImport.update({
-  id: '/profissionais',
-  path: '/profissionais',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const PodcastsRoute = PodcastsRouteImport.update({
   id: '/podcasts',
   path: '/podcasts',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CadastroProfissionalRoute = CadastroProfissionalRouteImport.update({
-  id: '/cadastro-profissional',
-  path: '/cadastro-profissional',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BlogRoute = BlogRouteImport.update({
@@ -63,9 +51,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/blog': typeof BlogRouteWithChildren
-  '/cadastro-profissional': typeof CadastroProfissionalRoute
   '/podcasts': typeof PodcastsRoute
-  '/profissionais': typeof ProfissionaisRoute
   '/projetos': typeof ProjetosRoute
   '/blog/$slug': typeof BlogSlugRoute
 }
@@ -73,9 +59,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/blog': typeof BlogRouteWithChildren
-  '/cadastro-profissional': typeof CadastroProfissionalRoute
   '/podcasts': typeof PodcastsRoute
-  '/profissionais': typeof ProfissionaisRoute
   '/projetos': typeof ProjetosRoute
   '/blog/$slug': typeof BlogSlugRoute
 }
@@ -84,9 +68,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/blog': typeof BlogRouteWithChildren
-  '/cadastro-profissional': typeof CadastroProfissionalRoute
   '/podcasts': typeof PodcastsRoute
-  '/profissionais': typeof ProfissionaisRoute
   '/projetos': typeof ProjetosRoute
   '/blog/$slug': typeof BlogSlugRoute
 }
@@ -96,9 +78,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/blog'
-    | '/cadastro-profissional'
     | '/podcasts'
-    | '/profissionais'
     | '/projetos'
     | '/blog/$slug'
   fileRoutesByTo: FileRoutesByTo
@@ -106,9 +86,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/blog'
-    | '/cadastro-profissional'
     | '/podcasts'
-    | '/profissionais'
     | '/projetos'
     | '/blog/$slug'
   id:
@@ -116,9 +94,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/blog'
-    | '/cadastro-profissional'
     | '/podcasts'
-    | '/profissionais'
     | '/projetos'
     | '/blog/$slug'
   fileRoutesById: FileRoutesById
@@ -127,9 +103,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
   BlogRoute: typeof BlogRouteWithChildren
-  CadastroProfissionalRoute: typeof CadastroProfissionalRoute
   PodcastsRoute: typeof PodcastsRoute
-  ProfissionaisRoute: typeof ProfissionaisRoute
   ProjetosRoute: typeof ProjetosRoute
 }
 
@@ -142,25 +116,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProjetosRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/profissionais': {
-      id: '/profissionais'
-      path: '/profissionais'
-      fullPath: '/profissionais'
-      preLoaderRoute: typeof ProfissionaisRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/podcasts': {
       id: '/podcasts'
       path: '/podcasts'
       fullPath: '/podcasts'
       preLoaderRoute: typeof PodcastsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/cadastro-profissional': {
-      id: '/cadastro-profissional'
-      path: '/cadastro-profissional'
-      fullPath: '/cadastro-profissional'
-      preLoaderRoute: typeof CadastroProfissionalRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/blog': {
@@ -208,9 +168,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   BlogRoute: BlogRouteWithChildren,
-  CadastroProfissionalRoute: CadastroProfissionalRoute,
   PodcastsRoute: PodcastsRoute,
-  ProfissionaisRoute: ProfissionaisRoute,
   ProjetosRoute: ProjetosRoute,
 }
 export const routeTree = rootRouteImport

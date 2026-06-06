@@ -35,6 +35,7 @@
   --color-clay: var(--clay);
   --color-ochre: var(--ochre);
   --color-sertao: var(--sertao);
+  --color-flame: var(--flame);
   --color-ink: var(--ink);
   --color-paper: var(--paper);
 }
@@ -48,6 +49,7 @@
   --clay: oklch(0.55 0.16 38); /* terracota */
   --ochre: oklch(0.72 0.14 75); /* ocre/dourado */
   --sertao: oklch(0.45 0.08 145); /* verde caatinga */
+  --flame: oklch(0.55 0.24 28);     /* vermelho forró */
 
   --background: var(--paper);
   --foreground: var(--ink);
