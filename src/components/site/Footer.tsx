@@ -42,8 +42,8 @@ export function Footer() {
             <a href="#" className="hover:text-paper">
               YouTube
             </a>
-            <a href="#" className="hover:text-paper">
-              Lei Paulo Gustavo
+            <a href="/" className="hover:text-paper">
+              Voltar ao início
             </a>
           </div>
         </div>
