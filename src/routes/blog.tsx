@@ -4,12 +4,27 @@ import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { ShareButton } from "@/components/ui/share-button";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchBlogspotPosts, fetchBlogspotPostBySlug } from "@/lib/blogspot";
+import type { BlogspotPost } from "@/lib/blogspot";
 
 export const Route = createFileRoute("/blog")({
   component: BlogList,
 });
 
-type Post = {
+type SupabasePost = {
+  id: string;
+  titulo: string;
+  slug: string;
+  excerpt: string | null;
+  conteudo?: string;
+  capa_url: string | null;
+  categoria: string;
+  autor: string | null;
+  published_at: string | null;
+  imagens: string[] | null;
+};
+
+type UnifiedPost = {
   id: string;
   titulo: string;
   slug: string;
@@ -20,31 +35,79 @@ type Post = {
   autor: string | null;
   published_at: string | null;
   imagens: string[] | null;
+  source: "supabase" | "blogspot";
+  link?: string;
 };
 
 const CATEGORIAS = ["todas", "noticia", "oficina", "evento"];
 
+function mergeAndSort(supabasePosts: SupabasePost[], blogspotPosts: BlogspotPost[]): UnifiedPost[] {
+  const all: UnifiedPost[] = [
+    ...supabasePosts.map((p) => ({ ...p, conteudo: p.conteudo ?? "", source: "supabase" as const })),
+    ...blogspotPosts.map((p) => ({
+      id: p.id,
+      titulo: p.titulo,
+      slug: p.slug,
+      excerpt: p.excerpt,
+      conteudo: p.conteudo,
+      capa_url: p.capa_url,
+      categoria: p.categoria,
+      autor: p.autor,
+      published_at: p.published_at,
+      imagens: null,
+      source: "blogspot" as const,
+      link: p.link,
+    })),
+  ];
+  return all.sort((a, b) => {
+    const da = a.published_at ? new Date(a.published_at).getTime() : 0;
+    const db = b.published_at ? new Date(b.published_at).getTime() : 0;
+    return db - da;
+  });
+}
+
 function BlogList() {
-  const [posts, setPosts] = useState<Post[]>([]);
+  const [posts, setPosts] = useState<UnifiedPost[]>([]);
   const [filtro, setFiltro] = useState("todas");
   const [loading, setLoading] = useState(true);
-  const [currentPost, setCurrentPost] = useState<Post | null>(null);
+  const [currentPost, setCurrentPost] = useState<UnifiedPost | null>(null);
 
   useEffect(() => {
     const path = window.location.pathname;
     const slugMatch = path.match(/^\/blog\/([^/]+)$/);
     if (slugMatch) {
       const slug = slugMatch[1];
-      supabase
-        .from("posts")
-        .select("id, titulo, excerpt, conteudo, capa_url, imagens, categoria, autor, published_at")
-        .eq("slug", slug)
-        .eq("publicado", true)
-        .maybeSingle()
-        .then(({ data }) => {
-          if (data) setCurrentPost(data);
-          setLoading(false);
-        });
+      Promise.all([
+        supabase
+          .from("posts")
+          .select("id, titulo, slug, excerpt, conteudo, capa_url, imagens, categoria, autor, published_at")
+          .eq("slug", slug)
+          .eq("publicado", true)
+          .maybeSingle(),
+        fetchBlogspotPostBySlug(slug),
+      ]).then(([supaResult, blogspotPost]) => {
+        if (supaResult.data) {
+          setCurrentPost({ ...supaResult.data, source: "supabase" });
+        } else if (blogspotPost) {
+          setCurrentPost({
+            id: blogspotPost.id,
+            titulo: blogspotPost.titulo,
+            slug: blogspotPost.slug,
+            excerpt: blogspotPost.excerpt,
+            conteudo: blogspotPost.conteudo,
+            capa_url: blogspotPost.capa_url,
+            categoria: blogspotPost.categoria,
+            autor: blogspotPost.autor,
+            published_at: blogspotPost.published_at,
+            imagens: null,
+            source: "blogspot",
+            link: blogspotPost.link,
+          });
+        } else {
+          setCurrentPost(null);
+        }
+        setLoading(false);
+      });
     } else {
       setLoading(true);
       let q = supabase
@@ -53,8 +116,14 @@ function BlogList() {
         .eq("publicado", true)
         .order("published_at", { ascending: false });
       if (filtro !== "todas") q = q.eq("categoria", filtro);
-      q.then(({ data }) => {
-        setPosts(data ?? []);
+
+      Promise.all([q, fetchBlogspotPosts()]).then(([supaResult, blogspotPosts]) => {
+        let filtered = supaResult.data ?? [];
+        if (filtro !== "todas") {
+          filtered = filtered.filter((p) => p.categoria === filtro);
+          blogspotPosts = blogspotPosts.filter((p) => p.categoria === filtro);
+        }
+        setPosts(mergeAndSort(filtered, blogspotPosts));
         setLoading(false);
       });
     }
@@ -108,9 +177,16 @@ function BlogList() {
                   {currentPost.excerpt}
                 </p>
               )}
-              <div className="prose prose-lg max-w-none text-foreground/90 leading-relaxed whitespace-pre-wrap text-lg">
-                {currentPost.conteudo}
-              </div>
+              {currentPost.source === "blogspot" ? (
+                <div
+                  className="prose prose-lg max-w-none text-foreground/90 leading-relaxed text-lg [&_img]:w-full [&_img]:max-h-[500px] [&_img]:object-contain [&_img]:border [&_img]:border-border [&_a]:text-clay [&_a]:underline"
+                  dangerouslySetInnerHTML={{ __html: currentPost.conteudo }}
+                />
+              ) : (
+                <div className="prose prose-lg max-w-none text-foreground/90 leading-relaxed whitespace-pre-wrap text-lg">
+                  {currentPost.conteudo}
+                </div>
+              )}
               {currentPost.imagens && currentPost.imagens.length > 0 && (
                 <div className="mt-8 space-y-4">
                   {currentPost.imagens.map((url: string, i: number) => (
@@ -172,7 +248,11 @@ function BlogList() {
                   <div
                     key={p.id}
                     className="group block cursor-pointer"
-                    onClick={() => (window.location.href = `/blog/${p.slug}`)}
+                    onClick={() =>
+                      p.source === "blogspot" && p.link
+                        ? (window.location.href = p.link)
+                        : (window.location.href = `/blog/${p.slug}`)
+                    }
                   >
                     <div className="relative overflow-hidden aspect-[4/5] mb-5 bg-secondary">
                       {p.capa_url ? (

@@ -4,6 +4,7 @@ import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { ShareButton } from "@/components/ui/share-button";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchBlogspotPostBySlug } from "@/lib/blogspot";
 
 export const Route = createFileRoute("/blog/$slug")({
   component: BlogPost,
@@ -27,6 +28,8 @@ type Post = {
   categoria: string;
   autor: string | null;
   published_at: string | null;
+  source: "supabase" | "blogspot";
+  link?: string;
 };
 
 function BlogPost() {
@@ -36,20 +39,36 @@ function BlogPost() {
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
-    console.log("Loading post for slug:", slug);
-    supabase
-      .from("posts")
-      .select("id, titulo, excerpt, conteudo, capa_url, imagens, categoria, autor, published_at")
-      .eq("slug", slug)
-      .eq("publicado", true)
-      .maybeSingle()
-      .then(({ data, error }) => {
-        console.log("Post data:", data);
-        console.log("Error:", error);
-        if (!data) setNotFound(true);
-        else setPost(data);
-        setLoading(false);
-      });
+    Promise.all([
+      supabase
+        .from("posts")
+        .select("id, titulo, excerpt, conteudo, capa_url, imagens, categoria, autor, published_at")
+        .eq("slug", slug)
+        .eq("publicado", true)
+        .maybeSingle(),
+      fetchBlogspotPostBySlug(slug),
+    ]).then(([supaResult, blogspotPost]) => {
+      if (supaResult.data) {
+        setPost({ ...supaResult.data, source: "supabase" });
+      } else if (blogspotPost) {
+        setPost({
+          id: blogspotPost.id,
+          titulo: blogspotPost.titulo,
+          excerpt: blogspotPost.excerpt,
+          conteudo: blogspotPost.conteudo,
+          capa_url: blogspotPost.capa_url,
+          imagens: null,
+          categoria: blogspotPost.categoria,
+          autor: blogspotPost.autor,
+          published_at: blogspotPost.published_at,
+          source: "blogspot",
+          link: blogspotPost.link,
+        });
+      } else {
+        setNotFound(true);
+      }
+      setLoading(false);
+    });
   }, [slug]);
 
   return (
@@ -108,9 +127,16 @@ function BlogPost() {
                     {post.excerpt}
                   </p>
                 )}
-                <div className="prose prose-lg max-w-none text-foreground/90 leading-relaxed whitespace-pre-wrap text-lg">
-                  {post.conteudo}
-                </div>
+                {post.source === "blogspot" ? (
+                  <div
+                    className="prose prose-lg max-w-none text-foreground/90 leading-relaxed text-lg [&_img]:w-full [&_img]:max-h-[500px] [&_img]:object-contain [&_img]:border [&_img]:border-border [&_a]:text-clay [&_a]:underline"
+                    dangerouslySetInnerHTML={{ __html: post.conteudo }}
+                  />
+                ) : (
+                  <div className="prose prose-lg max-w-none text-foreground/90 leading-relaxed whitespace-pre-wrap text-lg">
+                    {post.conteudo}
+                  </div>
+                )}
                 {post.imagens && post.imagens && post.imagens.length > 0 && (
                   <div className="mt-8 space-y-4">
                     {post.imagens.map((url: string, i: number) => (

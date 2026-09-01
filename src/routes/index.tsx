@@ -8,6 +8,8 @@ import poesiaImg from "@/assets/oficina-poesia.jpg";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchBlogspotPosts } from "@/lib/blogspot";
+import type { BlogspotPost } from "@/lib/blogspot";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -236,6 +238,8 @@ type PostPreview = {
   categoria: string;
   autor: string | null;
   published_at: string | null;
+  source?: "supabase" | "blogspot";
+  link?: string;
 };
 
 function UltimasPostagens() {
@@ -243,16 +247,38 @@ function UltimasPostagens() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase
-      .from("posts")
-      .select("id, titulo, slug, excerpt, capa_url, categoria, autor, published_at")
-      .eq("publicado", true)
-      .order("published_at", { ascending: false })
-      .limit(3)
-      .then(({ data }) => {
-        setPosts(data ?? []);
-        setLoading(false);
-      });
+    Promise.all([
+      supabase
+        .from("posts")
+        .select("id, titulo, slug, excerpt, capa_url, categoria, autor, published_at")
+        .eq("publicado", true)
+        .order("published_at", { ascending: false })
+        .limit(3),
+      fetchBlogspotPosts(),
+    ]).then(([supaResult, blogspotPosts]) => {
+      const supaPosts: PostPreview[] = (supaResult.data ?? []).map((p) => ({ ...p, source: "supabase" as const }));
+      const bsPosts: PostPreview[] = blogspotPosts.slice(0, 3).map((p) => ({
+        id: p.id,
+        titulo: p.titulo,
+        slug: p.slug,
+        excerpt: p.excerpt,
+        capa_url: p.capa_url,
+        categoria: p.categoria,
+        autor: p.autor,
+        published_at: p.published_at,
+        source: "blogspot" as const,
+        link: p.link,
+      }));
+      const merged = [...supaPosts, ...bsPosts]
+        .sort((a, b) => {
+          const da = a.published_at ? new Date(a.published_at).getTime() : 0;
+          const db = b.published_at ? new Date(b.published_at).getTime() : 0;
+          return db - da;
+        })
+        .slice(0, 3);
+      setPosts(merged);
+      setLoading(false);
+    });
   }, []);
 
   if (!loading && posts.length === 0) return null;
@@ -277,7 +303,45 @@ function UltimasPostagens() {
           </Link>
         </div>
         <div className="grid md:grid-cols-3 gap-10">
-          {posts.map((p) => (
+          {posts.map((p) =>
+            p.source === "blogspot" && p.link ? (
+              <a key={p.id} href={p.link} target="_blank" rel="noopener noreferrer" className="group block">
+              <div className="relative overflow-hidden aspect-[4/5] mb-5 bg-secondary">
+                {p.capa_url ? (
+                  <img
+                    src={p.capa_url}
+                    alt={p.titulo}
+                    loading="lazy"
+                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                ) : (
+                  <div className="h-full w-full bg-clay/20 flex items-center justify-center text-6xl text-clay/40 font-display">
+                    ✦
+                  </div>
+                )}
+                <div className="absolute top-4 left-4 bg-paper text-ink text-xs px-3 py-1.5 font-mono uppercase tracking-wider">
+                  {p.categoria}
+                </div>
+              </div>
+              <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground mb-2">
+                {p.published_at
+                  ? new Date(p.published_at).toLocaleDateString("pt-BR", {
+                      day: "2-digit",
+                      month: "long",
+                      year: "numeric",
+                    })
+                  : ""}
+              </div>
+              <h3 className="font-display text-2xl md:text-3xl leading-tight group-hover:text-clay transition-colors">
+                {p.titulo}
+              </h3>
+              {p.excerpt && (
+                <p className="mt-3 text-muted-foreground leading-relaxed line-clamp-3">
+                  {p.excerpt}
+                </p>
+              )}
+            </a>
+            ) : (
             <Link key={p.id} to="/blog/$slug" params={{ slug: p.slug }} className="group block">
               <div className="relative overflow-hidden aspect-[4/5] mb-5 bg-secondary">
                 {p.capa_url ? (
@@ -314,7 +378,8 @@ function UltimasPostagens() {
                 </p>
               )}
             </Link>
-          ))}
+            )
+          )}
         </div>
       </div>
     </section>

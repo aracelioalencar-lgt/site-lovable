@@ -82,13 +82,7 @@ export interface FileRouteTypes {
     | '/projetos'
     | '/blog/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/admin'
-    | '/blog'
-    | '/podcasts'
-    | '/projetos'
-    | '/blog/$slug'
+  to: '/' | '/admin' | '/blog' | '/podcasts' | '/projetos' | '/blog/$slug'
   id:
     | '__root__'
     | '/'
