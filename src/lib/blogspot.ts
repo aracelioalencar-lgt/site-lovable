@@ -1,3 +1,5 @@
+import { createServerFn } from "@tanstack/react-start";
+
 const BLOGSPOT_URL = "https://eikenproject.blogspot.com";
 const FEED_URL = `${BLOGSPOT_URL}/feeds/posts/default?alt=json&max-results=50`;
 
@@ -78,32 +80,43 @@ function entryToPost(entry: BloggerFeedEntry): BlogspotPost {
   };
 }
 
-export async function fetchBlogspotPosts(): Promise<BlogspotPost[]> {
-  try {
-    const res = await fetch(FEED_URL);
-    if (!res.ok) {
-      console.warn(`[Blogspot] Feed retornou ${res.status}: ${res.statusText}`);
+const fetchBlogspotPostsServer = createServerFn({ method: "GET" as const })
+  .handler(async () => {
+    try {
+      const res = await fetch(FEED_URL);
+      if (!res.ok) {
+        console.warn(`[Blogspot] Feed retornou ${res.status}: ${res.statusText}`);
+        return [];
+      }
+      const data: BloggerFeedResponse = await res.json();
+      if (!data.feed?.entry) return [];
+      return data.feed.entry.map(entryToPost);
+    } catch (err) {
+      console.error("[Blogspot] Erro ao buscar posts:", err);
       return [];
     }
-    const data: BloggerFeedResponse = await res.json();
-    if (!data.feed?.entry) return [];
-    return data.feed.entry.map(entryToPost);
-  } catch (err) {
-    console.error("[Blogspot] Erro ao buscar posts:", err);
-    return [];
-  }
+  });
+
+const fetchBlogspotPostBySlugServer = createServerFn({ method: "GET" as const })
+  .inputValidator((slug: string) => slug)
+  .handler(async ({ data: slug }) => {
+    try {
+      const searchUrl = `${BLOGSPOT_URL}/feeds/posts/default/-/${slug}?alt=json`;
+      const res = await fetch(searchUrl);
+      if (!res.ok) return null;
+      const data: BloggerFeedResponse = await res.json();
+      if (!data.feed?.entry?.length) return null;
+      return entryToPost(data.feed.entry[0]);
+    } catch (err) {
+      console.error("[Blogspot] Erro ao buscar post:", err);
+      return null;
+    }
+  });
+
+export async function fetchBlogspotPosts(): Promise<BlogspotPost[]> {
+  return fetchBlogspotPostsServer();
 }
 
 export async function fetchBlogspotPostBySlug(slug: string): Promise<BlogspotPost | null> {
-  try {
-    const searchUrl = `${BLOGSPOT_URL}/feeds/posts/default/-/${slug}?alt=json`;
-    const res = await fetch(searchUrl);
-    if (!res.ok) return null;
-    const data: BloggerFeedResponse = await res.json();
-    if (!data.feed?.entry?.length) return null;
-    return entryToPost(data.feed.entry[0]);
-  } catch (err) {
-    console.error("[Blogspot] Erro ao buscar post:", err);
-    return null;
-  }
+  return fetchBlogspotPostBySlugServer({ data: slug });
 }
