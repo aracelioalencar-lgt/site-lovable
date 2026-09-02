@@ -92,6 +92,7 @@ function AuthForm() {
   const [name, setName] = useState("");
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -180,16 +181,27 @@ function AuthForm() {
                 setErr("Digite seu email primeiro.");
                 return;
               }
+              setErr("");
+              setLoading(true);
               const { error } = await supabase.auth.resetPasswordForEmail(email, {
                 redirectTo: window.location.origin + "/admin",
               });
-              if (error) setErr(error.message);
-              else setErr("Email de redefinição enviado!");
+              setLoading(false);
+              if (error) {
+                setErr(error.message);
+              } else {
+                setResetSent(true);
+              }
             }}
             className="text-sm text-muted-foreground hover:text-clay"
           >
             Esqueceu a senha?
           </button>
+        )}
+        {resetSent && (
+          <div className="text-sm text-clay mt-2">
+            Email de redefinição enviado! Verifique sua caixa de entrada.
+          </div>
         )}
       </form>
       <button
