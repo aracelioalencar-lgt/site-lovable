@@ -37,9 +37,13 @@ type BloggerFeedResponse = {
   };
 };
 
+function upgradeBloggerImageUrl(url: string): string {
+  return url.replace(/\/s\d+(-c)?\//, "/s1600/");
+}
+
 function extractFirstImage(html: string): string | null {
   const match = html.match(/<img[^>]+src=["']([^"']+)["']/i);
-  return match ? match[1] : null;
+  return match ? upgradeBloggerImageUrl(match[1]) : null;
 }
 
 function extractExcerpt(html: string, maxLength = 200): string {
@@ -61,16 +65,21 @@ function slugFromTitle(title: string): string {
 function entryToPost(entry: BloggerFeedEntry): BlogspotPost {
   const link = entry.link?.find((l) => l.rel === "alternate")?.href ?? "";
   const slug = link.split("/").pop()?.replace(".html", "") ?? slugFromTitle(entry.title.$t);
-  const imageUrl =
+  const rawUrl =
     entry.media$thumbnail?.url ?? entry.media$content?.url ?? extractFirstImage(entry.content.$t);
+  const imageUrl = rawUrl ? upgradeBloggerImageUrl(rawUrl) : null;
   const categories = entry.category?.map((c) => c.term) ?? [];
+  const conteudo = entry.content.$t.replace(
+    /\/s\d+(-c)?\//g,
+    "/s1600/"
+  );
 
   return {
     id: entry.id.$t,
     titulo: entry.title.$t,
     slug,
     excerpt: extractExcerpt(entry.content.$t),
-    conteudo: entry.content.$t,
+    conteudo,
     capa_url: imageUrl,
     categoria: categories[0] || "noticia",
     autor: entry.author?.[0]?.name.$t ?? "Eiken Project",
