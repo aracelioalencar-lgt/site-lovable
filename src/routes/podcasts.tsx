@@ -290,7 +290,7 @@ function PodcastsPage() {
                         src={p.capa_url}
                         alt={p.titulo}
                         loading="lazy"
-                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        className="h-full w-full object-cover"
                       />
                     ) : (
                       <div className="h-full w-full bg-gradient-to-br from-clay/20 to-ochre/20 flex items-center justify-center text-6xl text-clay/40">

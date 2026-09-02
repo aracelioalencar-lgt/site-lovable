@@ -203,7 +203,7 @@ function Oficinas() {
                   loading="lazy"
                   width={1024}
                   height={1280}
-                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  className="h-full w-full object-cover"
                 />
                 <div className="absolute top-4 left-4 bg-paper text-ink text-xs px-3 py-1.5 font-mono">
                   N° {o.n}
@@ -312,7 +312,7 @@ function UltimasPostagens() {
                     src={p.capa_url}
                     alt={p.titulo}
                     loading="lazy"
-                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    className="h-full w-full object-cover"
                   />
                 ) : (
                   <div className="h-full w-full bg-clay/20 flex items-center justify-center text-6xl text-clay/40 font-display">
@@ -349,7 +349,7 @@ function UltimasPostagens() {
                     src={p.capa_url}
                     alt={p.titulo}
                     loading="lazy"
-                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    className="h-full w-full object-cover"
                   />
                 ) : (
                   <div className="h-full w-full bg-clay/20 flex items-center justify-center text-6xl text-clay/40 font-display">

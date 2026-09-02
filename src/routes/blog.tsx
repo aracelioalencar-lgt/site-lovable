@@ -260,14 +260,14 @@ function BlogList() {
                           src={p.capa_url}
                           alt={p.titulo}
                           loading="lazy"
-                          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                          className="h-full w-full object-cover"
                         />
                       ) : p.imagens && p.imagens.length > 0 ? (
                         <img
                           src={p.imagens[0]}
                           alt={p.titulo}
                           loading="lazy"
-                          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                          className="h-full w-full object-cover"
                         />
                       ) : (
                         <div className="h-full w-full bg-clay/20 flex items-center justify-center text-6xl text-clay/40 font-display">

@@ -153,7 +153,7 @@ function ProjetosPage() {
                         src={p.capa_url}
                         alt={p.titulo}
                         loading="lazy"
-                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        className="h-full w-full object-cover"
                       />
                     ) : (
                       <div className="h-full w-full bg-gradient-to-br from-clay/30 via-ochre/20 to-clay/10 flex items-center justify-center">
