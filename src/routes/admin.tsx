@@ -172,6 +172,25 @@ function AuthForm() {
         >
           {loading ? "Aguarde…" : mode === "login" ? "Entrar" : "Cadastrar"}
         </button>
+        {mode === "login" && (
+          <button
+            type="button"
+            onClick={async () => {
+              if (!email) {
+                setErr("Digite seu email primeiro.");
+                return;
+              }
+              const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                redirectTo: window.location.origin + "/admin",
+              });
+              if (error) setErr(error.message);
+              else setErr("Email de redefinição enviado!");
+            }}
+            className="text-sm text-muted-foreground hover:text-clay"
+          >
+            Esqueceu a senha?
+          </button>
+        )}
       </form>
       <button
         onClick={() => setMode(mode === "login" ? "signup" : "login")}
