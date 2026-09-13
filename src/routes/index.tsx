@@ -88,7 +88,7 @@ function Index() {
 
 function Hero() {
   return (
-    <section className="relative h-screen w-full overflow-hidden">
+    <section className="relative h-[80vh] w-full overflow-hidden">
       <div className="absolute inset-0 ken-burns">
         <img
           src={heroImg}
@@ -101,40 +101,40 @@ function Hero() {
       <div className="absolute inset-0 bg-gradient-to-b from-ink/30 via-ink/40 to-ink/80" />
       <div className="grain absolute inset-0" />
       <div className="relative z-10 flex h-full flex-col items-center justify-center px-6 text-center text-paper">
-        <p className="text-xs uppercase tracking-[0.4em] text-ochre mb-6 reveal">
+        <p className="text-[10px] uppercase tracking-[0.4em] text-ochre mb-4 reveal">
           Triunfo · Pernambuco
         </p>
         <h1
-          className="font-display text-5xl md:text-7xl lg:text-8xl tracking-tight leading-[1.05] max-w-5xl reveal"
+          className="font-display text-4xl md:text-5xl lg:text-6xl tracking-tight leading-[1.1] max-w-4xl reveal"
           style={{ animationDelay: "0.15s" }}
         >
           Arte viva do <em className="italic font-light text-ochre">sertão</em>
         </h1>
         <p
-          className="mt-6 max-w-xl text-paper/70 text-lg md:text-xl leading-relaxed reveal"
+          className="mt-4 max-w-lg text-paper/70 text-base md:text-lg leading-relaxed reveal"
           style={{ animationDelay: "0.3s" }}
         >
           Oficinas, mostras e tradição que celebram a cultura e o artesanato pernambucano.
         </p>
         <a
           href="#oficinas"
-          className="mt-10 inline-flex items-center gap-3 border border-paper/40 px-8 py-4 text-sm uppercase tracking-[0.2em] text-paper hover:bg-paper hover:text-ink transition-all duration-300 reveal"
+          className="mt-8 inline-flex items-center gap-2 border border-paper/40 px-6 py-3 text-xs uppercase tracking-[0.2em] text-paper hover:bg-paper hover:text-ink transition-all duration-300 reveal"
           style={{ animationDelay: "0.45s" }}
         >
           Explorar oficinas
-          <span className="text-lg">→</span>
+          <span>→</span>
         </a>
       </div>
       <div
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 z-10 reveal"
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 reveal"
         style={{ animationDelay: "0.6s" }}
       >
         <a
           href="#manifesto"
           className="flex flex-col items-center gap-2 text-paper/50 hover:text-paper transition-colors"
         >
-          <span className="text-xs uppercase tracking-[0.3em]">Scroll</span>
-          <span className="w-px h-8 bg-paper/30 animate-pulse" />
+          <span className="text-[10px] uppercase tracking-[0.3em]">Scroll</span>
+          <span className="w-px h-6 bg-paper/30 animate-pulse" />
         </a>
       </div>
     </section>
@@ -154,12 +154,12 @@ function Marquee() {
   ];
   const loop = [...items, ...items, ...items];
   return (
-    <div className="border-y border-border bg-clay text-paper py-6 overflow-hidden">
-      <div className="marquee whitespace-nowrap flex gap-12 text-2xl md:text-4xl font-display">
+    <div className="border-y border-border bg-clay text-paper py-4 overflow-hidden">
+      <div className="marquee whitespace-nowrap flex gap-10 text-lg md:text-2xl font-display">
         {loop.map((w, i) => (
-          <span key={i} className="flex items-center gap-12">
+          <span key={i} className="flex items-center gap-10">
             {w}
-            <span className="text-ochre">✦</span>
+            <span className="text-ochre text-sm">✦</span>
           </span>
         ))}
       </div>
@@ -169,15 +169,15 @@ function Marquee() {
 
 function Manifesto() {
   return (
-    <section id="manifesto" className="relative py-32 md:py-48 px-6 lg:px-12">
-      <div className="mx-auto max-w-[1400px] grid md:grid-cols-12 gap-12">
+    <section id="manifesto" className="relative py-20 md:py-28 px-6 lg:px-12">
+      <div className="mx-auto max-w-[1200px] grid md:grid-cols-12 gap-10">
         <div className="md:col-span-3">
-          <div className="text-xs uppercase tracking-[0.3em] text-muted-foreground sticky top-32">
+          <div className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground sticky top-32">
             <span className="text-clay">§</span> Manifesto
           </div>
         </div>
         <div className="md:col-span-9">
-          <p className="font-display text-3xl md:text-5xl lg:text-6xl leading-[1.1] tracking-tight">
+          <p className="font-display text-2xl md:text-4xl lg:text-[2.75rem] leading-[1.15] tracking-tight">
             Acreditamos que <em className="italic font-light text-clay">a arte do sertão</em> não
             cabe em vitrines — ela mora nas mãos, nos quintais e nas vozes de quem{" "}
             <span className="underline decoration-ochre decoration-4 underline-offset-8">
@@ -185,7 +185,7 @@ function Manifesto() {
             </span>
             .
           </p>
-          <div className="mt-16 grid sm:grid-cols-3 gap-10 text-sm leading-relaxed text-muted-foreground">
+          <div className="mt-12 grid sm:grid-cols-3 gap-8 text-sm leading-relaxed text-muted-foreground">
             {[
               {
                 t: "Memória viva",
@@ -202,12 +202,12 @@ function Manifesto() {
             ].map((b, i) => (
               <div
                 key={b.t}
-                className="border-t border-foreground/20 pt-4 group hover:border-clay transition-colors duration-500"
+                className="border-t border-foreground/20 pt-3 group hover:border-clay transition-colors duration-500"
               >
-                <h3 className="font-display text-xl text-foreground mb-2 group-hover:text-clay transition-colors">
+                <h3 className="font-display text-base text-foreground mb-1 group-hover:text-clay transition-colors">
                   {b.t}
                 </h3>
-                <p>{b.d}</p>
+                <p className="text-sm">{b.d}</p>
               </div>
             ))}
           </div>
@@ -219,25 +219,25 @@ function Manifesto() {
 
 function Oficinas() {
   return (
-    <section id="oficinas" className="bg-ink text-paper py-32 md:py-48 px-6 lg:px-12 grain">
-      <div className="mx-auto max-w-[1400px] relative z-10">
-        <div className="flex items-end justify-between mb-20 flex-wrap gap-6">
+    <section id="oficinas" className="bg-ink text-paper py-20 md:py-28 px-6 lg:px-12 grain">
+      <div className="mx-auto max-w-[1200px] relative z-10">
+        <div className="flex items-end justify-between mb-12 flex-wrap gap-4">
           <div>
-            <div className="text-xs uppercase tracking-[0.3em] text-ochre mb-4">
+            <div className="text-[10px] uppercase tracking-[0.3em] text-ochre mb-3">
               Catálogo 2025–2026
             </div>
-            <h2 className="font-display text-5xl md:text-7xl tracking-tight">
+            <h2 className="font-display text-3xl md:text-4xl tracking-tight">
               Oficinas <span className="italic font-light">&</span> mostras
             </h2>
           </div>
-          <div className="text-sm text-paper/60 max-w-xs">
+          <div className="text-xs text-paper/60 max-w-[280px]">
             Quatro caminhos para entrar na cultura do sertão pelas mãos de quem a vive.
           </div>
         </div>
-        <div className="grid md:grid-cols-2 gap-x-10 gap-y-20">
+        <div className="grid md:grid-cols-2 gap-x-8 gap-y-10">
           {oficinas.map((o, idx) => (
-            <article key={o.n} className={`group ${idx % 2 === 1 ? "md:mt-24" : ""}`}>
-              <div className="relative overflow-hidden mb-6 aspect-[4/5]">
+            <article key={o.n} className={`group ${idx % 2 === 1 ? "md:mt-12" : ""}`}>
+              <div className="relative overflow-hidden mb-4 aspect-[3/4]">
                 <img
                   src={o.img}
                   alt={o.titulo}
@@ -246,20 +246,20 @@ function Oficinas() {
                   height={1280}
                   className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
-                <div className="absolute top-4 left-4 bg-paper text-ink text-xs px-3 py-1.5 font-mono">
+                <div className="absolute top-3 left-3 bg-paper text-ink text-[10px] px-2 py-1 font-mono">
                   N° {o.n}
                 </div>
-                <div className="absolute bottom-4 right-4 text-paper/90 text-xs uppercase tracking-[0.2em] bg-ink/70 backdrop-blur-sm px-3 py-1.5">
+                <div className="absolute bottom-3 right-3 text-paper/90 text-[10px] uppercase tracking-[0.2em] bg-ink/70 backdrop-blur-sm px-2 py-1">
                   {o.data}
                 </div>
               </div>
-              <div className="flex items-baseline justify-between gap-4 mb-3">
-                <h3 className="font-display text-3xl md:text-4xl">{o.titulo}</h3>
-                <span className="text-ochre text-2xl">→</span>
+              <div className="flex items-baseline justify-between gap-3 mb-2">
+                <h3 className="font-display text-xl md:text-2xl">{o.titulo}</h3>
+                <span className="text-ochre text-lg">→</span>
               </div>
-              <div className="text-ochre italic mb-3 text-lg">{o.sub}</div>
-              <p className="text-paper/70 leading-relaxed mb-4">{o.desc}</p>
-              <div className="text-xs uppercase tracking-[0.2em] text-paper/50">
+              <div className="text-ochre italic mb-2 text-sm">{o.sub}</div>
+              <p className="text-paper/70 text-sm leading-relaxed mb-2">{o.desc}</p>
+              <div className="text-[10px] uppercase tracking-[0.2em] text-paper/50">
                 Oficineira · {o.oficineira}
               </div>
             </article>
@@ -328,25 +328,25 @@ function UltimasPostagens() {
   if (!loading && posts.length === 0) return null;
 
   return (
-    <section className="py-32 md:py-48 px-6 lg:px-12 border-t border-border">
-      <div className="mx-auto max-w-[1400px]">
-        <div className="flex items-end justify-between mb-16 flex-wrap gap-6">
+    <section className="py-20 md:py-28 px-6 lg:px-12 border-t border-border">
+      <div className="mx-auto max-w-[1200px]">
+        <div className="flex items-end justify-between mb-10 flex-wrap gap-4">
           <div>
-            <div className="text-xs uppercase tracking-[0.3em] text-muted-foreground mb-4">
+            <div className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-3">
               <span className="text-clay">§</span> Diário do Sertão
             </div>
-            <h2 className="font-display text-5xl md:text-7xl tracking-tight">
+            <h2 className="font-display text-3xl md:text-4xl tracking-tight">
               Últimas <em className="italic font-light text-clay">postagens</em>
             </h2>
           </div>
           <Link
             to="/blog"
-            className="text-xs uppercase tracking-[0.2em] border border-foreground px-5 py-3 hover:bg-foreground hover:text-background transition-colors"
+            className="text-[10px] uppercase tracking-[0.2em] border border-foreground px-4 py-2 hover:bg-foreground hover:text-background transition-colors"
           >
             Ver todas →
           </Link>
         </div>
-        <div className="grid md:grid-cols-3 gap-10">
+        <div className="grid md:grid-cols-3 gap-6">
           {posts.map((p) =>
             p.source === "blogspot" && p.link ? (
               <a
@@ -356,7 +356,7 @@ function UltimasPostagens() {
                 rel="noopener noreferrer"
                 className="group block"
               >
-                <div className="relative overflow-hidden aspect-[4/5] mb-5 bg-secondary">
+                <div className="relative overflow-hidden aspect-[3/4] mb-3 bg-secondary">
                   {p.capa_url ? (
                     <img
                       src={p.capa_url}
@@ -365,15 +365,15 @@ function UltimasPostagens() {
                       className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
                   ) : (
-                    <div className="h-full w-full bg-clay/20 flex items-center justify-center text-6xl text-clay/40 font-display">
+                    <div className="h-full w-full bg-clay/20 flex items-center justify-center text-4xl text-clay/40 font-display">
                       ✦
                     </div>
                   )}
-                  <div className="absolute top-4 left-4 bg-paper text-ink text-xs px-3 py-1.5 font-mono uppercase tracking-wider">
+                  <div className="absolute top-3 left-3 bg-paper text-ink text-[10px] px-2 py-1 font-mono uppercase tracking-wider">
                     {p.categoria}
                   </div>
                 </div>
-                <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground mb-2">
+                <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1">
                   {p.published_at
                     ? new Date(p.published_at).toLocaleDateString("pt-BR", {
                         day: "2-digit",
@@ -382,18 +382,18 @@ function UltimasPostagens() {
                       })
                     : ""}
                 </div>
-                <h3 className="font-display text-2xl md:text-3xl leading-tight group-hover:text-clay transition-colors">
+                <h3 className="font-display text-lg md:text-xl leading-tight group-hover:text-clay transition-colors">
                   {p.titulo}
                 </h3>
                 {p.excerpt && (
-                  <p className="mt-3 text-muted-foreground leading-relaxed line-clamp-3">
+                  <p className="mt-2 text-muted-foreground text-sm leading-relaxed line-clamp-2">
                     {p.excerpt}
                   </p>
                 )}
               </a>
             ) : (
               <Link key={p.id} to="/blog/$slug" params={{ slug: p.slug }} className="group block">
-                <div className="relative overflow-hidden aspect-[4/5] mb-5 bg-secondary">
+                <div className="relative overflow-hidden aspect-[3/4] mb-3 bg-secondary">
                   {p.capa_url ? (
                     <img
                       src={p.capa_url}
@@ -402,15 +402,15 @@ function UltimasPostagens() {
                       className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
                   ) : (
-                    <div className="h-full w-full bg-clay/20 flex items-center justify-center text-6xl text-clay/40 font-display">
+                    <div className="h-full w-full bg-clay/20 flex items-center justify-center text-4xl text-clay/40 font-display">
                       ✦
                     </div>
                   )}
-                  <div className="absolute top-4 left-4 bg-paper text-ink text-xs px-3 py-1.5 font-mono uppercase tracking-wider">
+                  <div className="absolute top-3 left-3 bg-paper text-ink text-[10px] px-2 py-1 font-mono uppercase tracking-wider">
                     {p.categoria}
                   </div>
                 </div>
-                <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground mb-2">
+                <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1">
                   {p.published_at
                     ? new Date(p.published_at).toLocaleDateString("pt-BR", {
                         day: "2-digit",
@@ -419,11 +419,11 @@ function UltimasPostagens() {
                       })
                     : ""}
                 </div>
-                <h3 className="font-display text-2xl md:text-3xl leading-tight group-hover:text-clay transition-colors">
+                <h3 className="font-display text-lg md:text-xl leading-tight group-hover:text-clay transition-colors">
                   {p.titulo}
                 </h3>
                 {p.excerpt && (
-                  <p className="mt-3 text-muted-foreground leading-relaxed line-clamp-3">
+                  <p className="mt-2 text-muted-foreground text-sm leading-relaxed line-clamp-2">
                     {p.excerpt}
                   </p>
                 )}
@@ -444,17 +444,17 @@ function Numeros() {
     { v: "2014", l: "Desde" },
   ];
   return (
-    <section className="py-24 px-6 lg:px-12 border-y border-border">
-      <div className="mx-auto max-w-[1400px] grid grid-cols-2 md:grid-cols-4 gap-12">
+    <section className="py-16 px-6 lg:px-12 border-y border-border">
+      <div className="mx-auto max-w-[1200px] grid grid-cols-2 md:grid-cols-4 gap-8">
         {stats.map((s) => (
           <div
             key={s.l}
-            className="border-t-2 border-clay pt-6 group hover:border-ochre transition-colors duration-500"
+            className="border-t-2 border-clay pt-4 group hover:border-ochre transition-colors duration-500"
           >
-            <div className="font-display text-5xl md:text-6xl tracking-tight group-hover:text-clay transition-colors">
+            <div className="font-display text-3xl md:text-4xl tracking-tight group-hover:text-clay transition-colors">
               {s.v}
             </div>
-            <div className="mt-3 text-xs uppercase tracking-[0.2em] text-muted-foreground">
+            <div className="mt-2 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
               {s.l}
             </div>
           </div>
@@ -472,16 +472,16 @@ function Agenda() {
     { d: "12", m: "Out", t: "A Arte do Careta · Apresentação", l: "Triunfo / PE" },
   ];
   return (
-    <section id="agenda" className="py-32 md:py-48 px-6 lg:px-12">
-      <div className="mx-auto max-w-[1400px]">
-        <div className="grid md:grid-cols-12 gap-10 mb-16">
+    <section id="agenda" className="py-20 md:py-28 px-6 lg:px-12">
+      <div className="mx-auto max-w-[1200px]">
+        <div className="grid md:grid-cols-12 gap-8 mb-10">
           <div className="md:col-span-3">
-            <div className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
+            <div className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
               <span className="text-clay">§</span> Agenda
             </div>
           </div>
           <div className="md:col-span-9">
-            <h2 className="font-display text-5xl md:text-7xl tracking-tight">
+            <h2 className="font-display text-3xl md:text-4xl tracking-tight">
               O que vem <em className="italic font-light text-clay">aí</em>.
             </h2>
           </div>
@@ -491,23 +491,23 @@ function Agenda() {
             <a
               key={i}
               href="#"
-              className="group grid grid-cols-12 gap-4 md:gap-10 items-center py-8 md:py-10 border-b border-foreground/20 hover:bg-clay/5 transition-all duration-300 px-4"
+              className="group grid grid-cols-12 gap-3 md:gap-6 items-center py-5 md:py-6 border-b border-foreground/20 hover:bg-clay/5 transition-all duration-300 px-3"
             >
               <div className="col-span-2 font-display">
-                <div className="text-4xl md:text-6xl leading-none group-hover:text-clay transition-colors">
+                <div className="text-2xl md:text-3xl leading-none group-hover:text-clay transition-colors">
                   {e.d}
                 </div>
-                <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground mt-1">
+                <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mt-0.5">
                   {e.m}
                 </div>
               </div>
               <div className="col-span-8 md:col-span-7">
-                <div className="font-display text-2xl md:text-3xl group-hover:text-clay transition-colors">
+                <div className="font-display text-base md:text-lg group-hover:text-clay transition-colors">
                   {e.t}
                 </div>
-                <div className="text-sm text-muted-foreground mt-1">{e.l}</div>
+                <div className="text-xs text-muted-foreground mt-0.5">{e.l}</div>
               </div>
-              <div className="col-span-2 md:col-span-3 text-right text-2xl md:text-3xl text-muted-foreground group-hover:text-clay group-hover:translate-x-2 transition-all duration-300">
+              <div className="col-span-2 md:col-span-3 text-right text-lg md:text-xl text-muted-foreground group-hover:text-clay group-hover:translate-x-2 transition-all duration-300">
                 →
               </div>
             </a>
