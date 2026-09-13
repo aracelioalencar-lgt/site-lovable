@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import heroImg from "@/assets/guardioes.png";
+import heroImg from "@/assets/projeto-forro.png";
 import bordadoImg from "@/assets/oficina-bordado.jpg";
 import bijuteriaImg from "@/assets/oficina-bijuteria.jpg";
 import caretaImg from "@/assets/oficina-careta.jpg";
@@ -89,7 +89,7 @@ function Index() {
 function Hero() {
   return (
     <section className="relative h-screen w-full overflow-hidden">
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 ken-burns">
         <img
           src={heroImg}
           alt="Projeto Forró"
@@ -100,7 +100,43 @@ function Hero() {
       </div>
       <div className="absolute inset-0 bg-gradient-to-b from-ink/30 via-ink/40 to-ink/80" />
       <div className="grain absolute inset-0" />
-
+      <div className="relative z-10 flex h-full flex-col items-center justify-center px-6 text-center text-paper">
+        <p className="text-xs uppercase tracking-[0.4em] text-ochre mb-6 reveal">
+          Triunfo · Pernambuco
+        </p>
+        <h1
+          className="font-display text-5xl md:text-7xl lg:text-8xl tracking-tight leading-[1.05] max-w-5xl reveal"
+          style={{ animationDelay: "0.15s" }}
+        >
+          Arte viva do <em className="italic font-light text-ochre">sertão</em>
+        </h1>
+        <p
+          className="mt-6 max-w-xl text-paper/70 text-lg md:text-xl leading-relaxed reveal"
+          style={{ animationDelay: "0.3s" }}
+        >
+          Oficinas, mostras e tradição que celebram a cultura e o artesanato pernambucano.
+        </p>
+        <a
+          href="#oficinas"
+          className="mt-10 inline-flex items-center gap-3 border border-paper/40 px-8 py-4 text-sm uppercase tracking-[0.2em] text-paper hover:bg-paper hover:text-ink transition-all duration-300 reveal"
+          style={{ animationDelay: "0.45s" }}
+        >
+          Explorar oficinas
+          <span className="text-lg">→</span>
+        </a>
+      </div>
+      <div
+        className="absolute bottom-10 left-1/2 -translate-x-1/2 z-10 reveal"
+        style={{ animationDelay: "0.6s" }}
+      >
+        <a
+          href="#manifesto"
+          className="flex flex-col items-center gap-2 text-paper/50 hover:text-paper transition-colors"
+        >
+          <span className="text-xs uppercase tracking-[0.3em]">Scroll</span>
+          <span className="w-px h-8 bg-paper/30 animate-pulse" />
+        </a>
+      </div>
     </section>
   );
 }
@@ -163,9 +199,14 @@ function Manifesto() {
                 t: "Triunfo no mapa",
                 d: "Levamos a produção sertaneja para mostras, catálogos e festivais.",
               },
-            ].map((b) => (
-              <div key={b.t} className="border-t border-foreground/20 pt-4">
-                <h3 className="font-display text-xl text-foreground mb-2">{b.t}</h3>
+            ].map((b, i) => (
+              <div
+                key={b.t}
+                className="border-t border-foreground/20 pt-4 group hover:border-clay transition-colors duration-500"
+              >
+                <h3 className="font-display text-xl text-foreground mb-2 group-hover:text-clay transition-colors">
+                  {b.t}
+                </h3>
                 <p>{b.d}</p>
               </div>
             ))}
@@ -203,7 +244,7 @@ function Oficinas() {
                   loading="lazy"
                   width={1024}
                   height={1280}
-                  className="h-full w-full object-cover"
+                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
                 <div className="absolute top-4 left-4 bg-paper text-ink text-xs px-3 py-1.5 font-mono">
                   N° {o.n}
@@ -256,7 +297,10 @@ function UltimasPostagens() {
         .limit(3),
       fetchBlogspotPosts(),
     ]).then(([supaResult, blogspotPosts]) => {
-      const supaPosts: PostPreview[] = (supaResult.data ?? []).map((p) => ({ ...p, source: "supabase" as const }));
+      const supaPosts: PostPreview[] = (supaResult.data ?? []).map((p) => ({
+        ...p,
+        source: "supabase" as const,
+      }));
       const bsPosts: PostPreview[] = blogspotPosts.slice(0, 3).map((p) => ({
         id: p.id,
         titulo: p.titulo,
@@ -305,80 +349,86 @@ function UltimasPostagens() {
         <div className="grid md:grid-cols-3 gap-10">
           {posts.map((p) =>
             p.source === "blogspot" && p.link ? (
-              <a key={p.id} href={p.link} target="_blank" rel="noopener noreferrer" className="group block">
-              <div className="relative overflow-hidden aspect-[4/5] mb-5 bg-secondary">
-                {p.capa_url ? (
-                  <img
-                    src={p.capa_url}
-                    alt={p.titulo}
-                    loading="lazy"
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <div className="h-full w-full bg-clay/20 flex items-center justify-center text-6xl text-clay/40 font-display">
-                    ✦
+              <a
+                key={p.id}
+                href={p.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group block"
+              >
+                <div className="relative overflow-hidden aspect-[4/5] mb-5 bg-secondary">
+                  {p.capa_url ? (
+                    <img
+                      src={p.capa_url}
+                      alt={p.titulo}
+                      loading="lazy"
+                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="h-full w-full bg-clay/20 flex items-center justify-center text-6xl text-clay/40 font-display">
+                      ✦
+                    </div>
+                  )}
+                  <div className="absolute top-4 left-4 bg-paper text-ink text-xs px-3 py-1.5 font-mono uppercase tracking-wider">
+                    {p.categoria}
                   </div>
-                )}
-                <div className="absolute top-4 left-4 bg-paper text-ink text-xs px-3 py-1.5 font-mono uppercase tracking-wider">
-                  {p.categoria}
                 </div>
-              </div>
-              <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground mb-2">
-                {p.published_at
-                  ? new Date(p.published_at).toLocaleDateString("pt-BR", {
-                      day: "2-digit",
-                      month: "long",
-                      year: "numeric",
-                    })
-                  : ""}
-              </div>
-              <h3 className="font-display text-2xl md:text-3xl leading-tight group-hover:text-clay transition-colors">
-                {p.titulo}
-              </h3>
-              {p.excerpt && (
-                <p className="mt-3 text-muted-foreground leading-relaxed line-clamp-3">
-                  {p.excerpt}
-                </p>
-              )}
-            </a>
+                <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground mb-2">
+                  {p.published_at
+                    ? new Date(p.published_at).toLocaleDateString("pt-BR", {
+                        day: "2-digit",
+                        month: "long",
+                        year: "numeric",
+                      })
+                    : ""}
+                </div>
+                <h3 className="font-display text-2xl md:text-3xl leading-tight group-hover:text-clay transition-colors">
+                  {p.titulo}
+                </h3>
+                {p.excerpt && (
+                  <p className="mt-3 text-muted-foreground leading-relaxed line-clamp-3">
+                    {p.excerpt}
+                  </p>
+                )}
+              </a>
             ) : (
-            <Link key={p.id} to="/blog/$slug" params={{ slug: p.slug }} className="group block">
-              <div className="relative overflow-hidden aspect-[4/5] mb-5 bg-secondary">
-                {p.capa_url ? (
-                  <img
-                    src={p.capa_url}
-                    alt={p.titulo}
-                    loading="lazy"
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <div className="h-full w-full bg-clay/20 flex items-center justify-center text-6xl text-clay/40 font-display">
-                    ✦
+              <Link key={p.id} to="/blog/$slug" params={{ slug: p.slug }} className="group block">
+                <div className="relative overflow-hidden aspect-[4/5] mb-5 bg-secondary">
+                  {p.capa_url ? (
+                    <img
+                      src={p.capa_url}
+                      alt={p.titulo}
+                      loading="lazy"
+                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="h-full w-full bg-clay/20 flex items-center justify-center text-6xl text-clay/40 font-display">
+                      ✦
+                    </div>
+                  )}
+                  <div className="absolute top-4 left-4 bg-paper text-ink text-xs px-3 py-1.5 font-mono uppercase tracking-wider">
+                    {p.categoria}
                   </div>
-                )}
-                <div className="absolute top-4 left-4 bg-paper text-ink text-xs px-3 py-1.5 font-mono uppercase tracking-wider">
-                  {p.categoria}
                 </div>
-              </div>
-              <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground mb-2">
-                {p.published_at
-                  ? new Date(p.published_at).toLocaleDateString("pt-BR", {
-                      day: "2-digit",
-                      month: "long",
-                      year: "numeric",
-                    })
-                  : ""}
-              </div>
-              <h3 className="font-display text-2xl md:text-3xl leading-tight group-hover:text-clay transition-colors">
-                {p.titulo}
-              </h3>
-              {p.excerpt && (
-                <p className="mt-3 text-muted-foreground leading-relaxed line-clamp-3">
-                  {p.excerpt}
-                </p>
-              )}
-            </Link>
-            )
+                <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground mb-2">
+                  {p.published_at
+                    ? new Date(p.published_at).toLocaleDateString("pt-BR", {
+                        day: "2-digit",
+                        month: "long",
+                        year: "numeric",
+                      })
+                    : ""}
+                </div>
+                <h3 className="font-display text-2xl md:text-3xl leading-tight group-hover:text-clay transition-colors">
+                  {p.titulo}
+                </h3>
+                {p.excerpt && (
+                  <p className="mt-3 text-muted-foreground leading-relaxed line-clamp-3">
+                    {p.excerpt}
+                  </p>
+                )}
+              </Link>
+            ),
           )}
         </div>
       </div>
@@ -397,8 +447,13 @@ function Numeros() {
     <section className="py-24 px-6 lg:px-12 border-y border-border">
       <div className="mx-auto max-w-[1400px] grid grid-cols-2 md:grid-cols-4 gap-12">
         {stats.map((s) => (
-          <div key={s.l} className="border-t-2 border-clay pt-6">
-            <div className="font-display text-5xl md:text-6xl tracking-tight">{s.v}</div>
+          <div
+            key={s.l}
+            className="border-t-2 border-clay pt-6 group hover:border-ochre transition-colors duration-500"
+          >
+            <div className="font-display text-5xl md:text-6xl tracking-tight group-hover:text-clay transition-colors">
+              {s.v}
+            </div>
             <div className="mt-3 text-xs uppercase tracking-[0.2em] text-muted-foreground">
               {s.l}
             </div>
@@ -436,10 +491,12 @@ function Agenda() {
             <a
               key={i}
               href="#"
-              className="group grid grid-cols-12 gap-4 md:gap-10 items-center py-8 md:py-10 border-b border-foreground/20 hover:bg-clay/5 transition-colors px-2"
+              className="group grid grid-cols-12 gap-4 md:gap-10 items-center py-8 md:py-10 border-b border-foreground/20 hover:bg-clay/5 transition-all duration-300 px-4"
             >
               <div className="col-span-2 font-display">
-                <div className="text-4xl md:text-6xl leading-none">{e.d}</div>
+                <div className="text-4xl md:text-6xl leading-none group-hover:text-clay transition-colors">
+                  {e.d}
+                </div>
                 <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground mt-1">
                   {e.m}
                 </div>
@@ -450,7 +507,7 @@ function Agenda() {
                 </div>
                 <div className="text-sm text-muted-foreground mt-1">{e.l}</div>
               </div>
-              <div className="col-span-2 md:col-span-3 text-right text-2xl md:text-3xl text-muted-foreground group-hover:text-clay group-hover:translate-x-1 transition-all">
+              <div className="col-span-2 md:col-span-3 text-right text-2xl md:text-3xl text-muted-foreground group-hover:text-clay group-hover:translate-x-2 transition-all duration-300">
                 →
               </div>
             </a>

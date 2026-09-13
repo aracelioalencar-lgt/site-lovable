@@ -47,7 +47,10 @@ function extractFirstImage(html: string): string | null {
 }
 
 function extractExcerpt(html: string, maxLength = 200): string {
-  const text = html.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+  const text = html
+    .replace(/<[^>]+>/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
   return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
 }
 
@@ -69,10 +72,7 @@ function entryToPost(entry: BloggerFeedEntry): BlogspotPost {
     entry.media$thumbnail?.url ?? entry.media$content?.url ?? extractFirstImage(entry.content.$t);
   const imageUrl = rawUrl ? upgradeBloggerImageUrl(rawUrl) : null;
   const categories = entry.category?.map((c) => c.term) ?? [];
-  const conteudo = entry.content.$t.replace(
-    /\/s\d+(-c)?\//g,
-    "/s1600/"
-  );
+  const conteudo = entry.content.$t.replace(/\/s\d+(-c)?\//g, "/s1600/");
 
   return {
     id: entry.id.$t,
@@ -89,22 +89,21 @@ function entryToPost(entry: BloggerFeedEntry): BlogspotPost {
   };
 }
 
-const fetchBlogspotPostsServer = createServerFn({ method: "GET" as const })
-  .handler(async () => {
-    try {
-      const res = await fetch(FEED_URL);
-      if (!res.ok) {
-        console.warn(`[Blogspot] Feed retornou ${res.status}: ${res.statusText}`);
-        return [];
-      }
-      const data: BloggerFeedResponse = await res.json();
-      if (!data.feed?.entry) return [];
-      return data.feed.entry.map(entryToPost);
-    } catch (err) {
-      console.error("[Blogspot] Erro ao buscar posts:", err);
+const fetchBlogspotPostsServer = createServerFn({ method: "GET" as const }).handler(async () => {
+  try {
+    const res = await fetch(FEED_URL);
+    if (!res.ok) {
+      console.warn(`[Blogspot] Feed retornou ${res.status}: ${res.statusText}`);
       return [];
     }
-  });
+    const data: BloggerFeedResponse = await res.json();
+    if (!data.feed?.entry) return [];
+    return data.feed.entry.map(entryToPost);
+  } catch (err) {
+    console.error("[Blogspot] Erro ao buscar posts:", err);
+    return [];
+  }
+});
 
 const fetchBlogspotPostBySlugServer = createServerFn({ method: "GET" as const })
   .inputValidator((slug: string) => slug)

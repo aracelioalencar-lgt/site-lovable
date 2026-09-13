@@ -49,7 +49,7 @@
   --clay: oklch(0.55 0.16 38); /* terracota */
   --ochre: oklch(0.72 0.14 75); /* ocre/dourado */
   --sertao: oklch(0.45 0.08 145); /* verde caatinga */
-  --flame: oklch(0.55 0.24 28);     /* vermelho forró */
+  --flame: oklch(0.55 0.24 28); /* vermelho forró */
 
   --background: var(--paper);
   --foreground: var(--ink);
@@ -137,6 +137,17 @@
     to {
       opacity: 1;
       transform: translateY(0);
+    }
+  }
+  .ken-burns {
+    animation: kenburns 20s ease-out infinite alternate;
+  }
+  @keyframes kenburns {
+    from {
+      transform: scale(1) translate(0, 0);
+    }
+    to {
+      transform: scale(1.1) translate(-1%, -1%);
     }
   }
 }

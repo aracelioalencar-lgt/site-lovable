@@ -43,7 +43,11 @@ const CATEGORIAS = ["todas", "noticia", "oficina", "evento"];
 
 function mergeAndSort(supabasePosts: SupabasePost[], blogspotPosts: BlogspotPost[]): UnifiedPost[] {
   const all: UnifiedPost[] = [
-    ...supabasePosts.map((p) => ({ ...p, conteudo: p.conteudo ?? "", source: "supabase" as const })),
+    ...supabasePosts.map((p) => ({
+      ...p,
+      conteudo: p.conteudo ?? "",
+      source: "supabase" as const,
+    })),
     ...blogspotPosts.map((p) => ({
       id: p.id,
       titulo: p.titulo,
@@ -80,7 +84,9 @@ function BlogList() {
       Promise.all([
         supabase
           .from("posts")
-          .select("id, titulo, slug, excerpt, conteudo, capa_url, imagens, categoria, autor, published_at")
+          .select(
+            "id, titulo, slug, excerpt, conteudo, capa_url, imagens, categoria, autor, published_at",
+          )
           .eq("slug", slug)
           .eq("publicado", true)
           .maybeSingle(),
